@@ -1,2 +1,5 @@
 CREATE DATABASE auth_db;
 CREATE DATABASE shop_db;
+CREATE DATABASE product_db;
+CREATE DATABASE order_db;
+

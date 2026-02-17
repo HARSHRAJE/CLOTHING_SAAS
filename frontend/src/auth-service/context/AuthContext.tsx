@@ -39,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const login = (token: string, userData: User) => {
         localStorage.setItem('accessToken', token);
+        localStorage.setItem('user', JSON.stringify(userData)); // Persist user for Shop ID access
         setUser(userData);
 
         if (userData.role === Role.SUPER_ADMIN) {
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const logout = () => {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('user');
         setUser(null);
         router.push('/login');
     };

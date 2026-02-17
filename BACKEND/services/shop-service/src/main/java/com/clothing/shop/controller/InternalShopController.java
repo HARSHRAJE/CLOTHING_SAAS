@@ -22,4 +22,9 @@ public class InternalShopController {
     public ResponseEntity<ShopDto.ShopResponse> validateShopStatus(@PathVariable UUID shopId) {
         return ResponseEntity.ok(shopService.getShopById(shopId));
     }
+
+    @GetMapping("/slug/{slug}")
+    public ResponseEntity<ShopDto.ShopResponse> getShopBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(shopService.getInternalShopBySlug(slug));
+    }
 }

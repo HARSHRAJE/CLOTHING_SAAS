@@ -22,6 +22,7 @@ export default function AdminDashboard() {
     }, [user, isLoading, router]);
 
     if (isLoading || !user) return <div>Loading...</div>;
+    if (user.role !== Role.SUPER_ADMIN) return null; // Prevent rendering for non-admins to avoid API calls
 
     return (
         <div className="p-8">

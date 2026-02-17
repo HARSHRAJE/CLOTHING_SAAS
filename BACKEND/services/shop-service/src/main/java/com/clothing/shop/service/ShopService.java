@@ -162,6 +162,12 @@ public class ShopService {
                 .build();
     }
 
+    public ShopDto.ShopResponse getInternalShopBySlug(String slug) {
+        Shop shop = shopRepository.findBySlug(slug)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+        return mapToResponse(shop);
+    }
+
     // --- Mappers ---
 
     private ShopDto.ShopResponse mapToResponse(Shop shop) {

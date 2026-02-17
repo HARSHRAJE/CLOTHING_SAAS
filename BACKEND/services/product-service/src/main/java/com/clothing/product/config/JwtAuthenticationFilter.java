@@ -1,0 +1,108 @@
+package com.clothing.product.config;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+
+import java.io.IOException;
+import java.security.Key;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+
+    @Value("${application.security.jwt.secret-key}")
+    private String secretKey;
+
+    @Override
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
+        final String authHeader = request.getHeader("Authorization");
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            final String jwt = authHeader.substring(7);
+            final String userEmail = extractUsername(jwt);
+            final String role = extractRole(jwt);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                // In a real microservice, we might not load the full user from DB if we trust
+                // the token.
+                // We'll trust the token claims for now.
+
+                List<SimpleGrantedAuthority> authorities = Collections
+                        .singletonList(new SimpleGrantedAuthority("ROLE_" + role));
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userEmail,
+                        null,
+                        authorities);
+
+                // Add Shop ID to details if available
+                String shopId = extractClaim(jwt, "shopId", String.class);
+                if (shopId != null) {
+                    authToken.setDetails(shopId); // Storing ShopID in details
+                }
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        } catch (Exception e) {
+            // Token validation failed
+            System.err.println("JWT Validation Error: " + e.getMessage());
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+    private String extractUsername(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    private String extractRole(String token) {
+        return extractClaim(token, "role", String.class);
+    }
+
+    private <T> T extractClaim(String token, java.util.function.Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private <T> T extractClaim(String token, String claimKey, Class<T> type) {
+        final Claims claims = extractAllClaims(token);
+        return claims.get(claimKey, type);
+    }
+
+    private Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSignInKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    private Key getSignInKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+}

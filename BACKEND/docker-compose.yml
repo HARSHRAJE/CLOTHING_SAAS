@@ -13,8 +13,119 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./infra/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+  auth-service:
+    build: ./services/auth-service
+    container_name: auth-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8081
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+
+  shop-service:
+    build: ./services/shop-service
+    container_name: shop-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shop_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8082
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+
+  product-service:
+    build: ./services/product-service
+    container_name: product-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8083
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+
+  order-service:
+    build: ./services/order-service
+    container_name: order-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8084
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      SHOP_SERVICE_URL: http://shop-service:8082
+      PRODUCT_SERVICE_URL: http://product-service:8083
+      CUSTOMER_SERVICE_URL: http://customer-service:8085
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres
+      - auth-service
+
+  customer-service:
+    build: ./services/customer-service
+    container_name: customer-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/customer_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8085
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8085:8085"
+    depends_on:
+      - postgres
+      - auth-service
+
+  inquiry-service:
+    build: ./services/inquiry-service
+    container_name: inquiry-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/inquiry_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8086
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      SHOP_SERVICE_URL: http://shop-service:8082
+    ports:
+      - "8086:8086"
+    depends_on:
+      - postgres
+      - auth-service
+
+  analytics-service:
+    build: ./services/analytics-service
+    container_name: analytics-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/analytics_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8087
+      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+    ports:
+      - "8087:8087"
+    depends_on:
+      - postgres
+      - auth-service
+
 
 volumes:
   postgres_data:
-
