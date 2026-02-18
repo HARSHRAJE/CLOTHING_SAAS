@@ -1,14 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Inquiry, InquiryStatus } from '../models/Inquiry';
 import { InquiryService } from '../services/InquiryService';
+import { MessageCircle } from 'lucide-react';
+import { useAuth } from '../../auth-service/context/AuthContext';
+import { ShopService } from '../../shop-service/services/shop.service';
+import { sendWhatsAppNotification } from '../../notification-service/client';
 
 export const InquiryList: React.FC = () => {
+    const { user } = useAuth();
     const [inquiries, setInquiries] = useState<Inquiry[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [filterStatus, setFilterStatus] = useState<InquiryStatus | ''>('');
     const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+    const [shopName, setShopName] = useState<string>('Our Store');
+
+    useEffect(() => {
+        if (user?.shopId) {
+            ShopService.getMyShop().then(shop => {
+                if (shop && shop.name) setShopName(shop.name);
+            }).catch(err => console.error("Failed to fetch shop name", err));
+        }
+    }, [user]);
 
     useEffect(() => {
         fetchInquiries();
@@ -50,6 +64,35 @@ export const InquiryList: React.FC = () => {
             }
         } catch (error) {
             console.error('Failed to delete inquiry', error);
+        }
+    };
+
+    const handleContact = async (inquiry: Inquiry) => {
+        const phone = inquiry.phone;
+        if (!phone) {
+            alert("Customer phone number is missing");
+            return;
+        }
+
+        const message = `Hi ${inquiry.customerName}, this is regarding your inquiry at ${shopName}: "${inquiry.message?.substring(0, 30)}..."`;
+
+        try {
+            // Also mark as contacted if new
+            if (inquiry.status === InquiryStatus.NEW) {
+                handleStatusUpdate(inquiry.inquiryId, InquiryStatus.CONTACTED);
+            }
+
+            const response = await sendWhatsAppNotification(phone, message);
+            if (response && response.link) {
+                window.open(response.link, '_blank');
+            } else {
+                const encoded = encodeURIComponent(message);
+                window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+            }
+        } catch (error: any) {
+            console.error("Failed to generate WhatsApp link", error);
+            const encoded = encodeURIComponent(message);
+            window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
         }
     };
 
@@ -111,16 +154,23 @@ export const InquiryList: React.FC = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" onClick={(e) => e.stopPropagation()}>
-                                        <select
-                                            value={inquiry.status}
-                                            onChange={(e) => handleStatusUpdate(inquiry.inquiryId, e.target.value as InquiryStatus)}
-                                            className="mr-2 text-sm border rounded p-1"
-                                        >
-                                            <option value={InquiryStatus.NEW}>New</option>
-                                            <option value={InquiryStatus.CONTACTED}>Contacted</option>
-                                            <option value={InquiryStatus.CLOSED}>Closed</option>
-                                        </select>
-                                        <button onClick={() => handleDelete(inquiry.inquiryId)} className="text-red-600 hover:text-red-900 ml-2">Delete</button>
+                                        <div className="flex items-center space-x-2">
+                                            <button
+                                                onClick={() => handleContact(inquiry)}
+                                                className="p-1 hover:bg-green-100 rounded text-green-600" title="Reply on WhatsApp">
+                                                <MessageCircle size={18} />
+                                            </button>
+                                            <select
+                                                value={inquiry.status}
+                                                onChange={(e) => handleStatusUpdate(inquiry.inquiryId, e.target.value as InquiryStatus)}
+                                                className="text-sm border rounded p-1"
+                                            >
+                                                <option value={InquiryStatus.NEW}>New</option>
+                                                <option value={InquiryStatus.CONTACTED}>Contacted</option>
+                                                <option value={InquiryStatus.CLOSED}>Closed</option>
+                                            </select>
+                                            <button onClick={() => handleDelete(inquiry.inquiryId)} className="text-red-600 hover:text-red-900">Delete</button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -172,7 +222,14 @@ export const InquiryList: React.FC = () => {
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Phone</label>
-                                    <p className="mt-1">{selectedInquiry.phone}</p>
+                                    <p className="mt-1 flex items-center gap-2">
+                                        {selectedInquiry.phone}
+                                        <button
+                                            onClick={() => handleContact(selectedInquiry)}
+                                            className="text-green-600 hover:text-green-800" title="Reply on WhatsApp">
+                                            <MessageCircle size={16} />
+                                        </button>
+                                    </p>
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700">Email</label>
@@ -204,6 +261,13 @@ export const InquiryList: React.FC = () => {
                         </div>
 
                         <div className="mt-6 flex justify-end space-x-3">
+                            <button
+                                onClick={() => handleContact(selectedInquiry)}
+                                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"
+                            >
+                                <MessageCircle size={18} />
+                                Reply via WhatsApp
+                            </button>
                             {selectedInquiry.status === InquiryStatus.NEW && (
                                 <button
                                     onClick={() => handleStatusUpdate(selectedInquiry.inquiryId, InquiryStatus.CONTACTED)}

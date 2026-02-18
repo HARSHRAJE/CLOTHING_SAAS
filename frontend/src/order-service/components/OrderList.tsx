@@ -2,13 +2,26 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Order, OrderStatus } from '../models/Order';
 import { OrderService } from '../services/OrderService';
-import { Eye, CheckCircle, Package, Truck } from 'lucide-react';
+import { Eye, CheckCircle, Package, Truck, MessageCircle } from 'lucide-react';
+import { useAuth } from '../../auth-service/context/AuthContext';
+import { ShopService } from '../../shop-service/services/shop.service';
+import { sendWhatsAppNotification } from '../../notification-service/client';
 
 const OrderList = () => {
+    const { user } = useAuth();
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
+    const [shopName, setShopName] = useState<string>('Our Store');
+
+    useEffect(() => {
+        if (user?.shopId) {
+            ShopService.getMyShop().then(shop => {
+                if (shop && shop.name) setShopName(shop.name);
+            }).catch(err => console.error("Failed to fetch shop name", err));
+        }
+    }, [user]);
 
     useEffect(() => {
         fetchOrders();
@@ -33,6 +46,32 @@ const OrderList = () => {
             fetchOrders(); // Refresh
         } catch (error) {
             console.error('Failed to update status', error);
+        }
+    };
+
+    const handleContact = async (order: Order) => {
+        const phone = order.customer.phone;
+        if (!phone) {
+            alert("Customer phone number is missing");
+            return;
+        }
+
+        const message = `Hi, welcome from ${shopName}, your order ${order.orderNumber} is placed.`;
+
+        try {
+            const response = await sendWhatsAppNotification(phone, message);
+            if (response && response.link) {
+                window.open(response.link, '_blank');
+            } else {
+                // Fallback
+                const encoded = encodeURIComponent(message);
+                window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+            }
+        } catch (error: any) {
+            console.error("Failed to generate WhatsApp link", error);
+            // Fallback on error
+            const encoded = encodeURIComponent(message);
+            window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
         }
     };
 
@@ -94,6 +133,12 @@ const OrderList = () => {
                                 </td>
                                 <td className="py-3">
                                     <div className="flex space-x-2">
+                                        <button
+                                            onClick={() => handleContact(order)}
+                                            className="p-1 hover:bg-green-100 rounded text-green-600" title="Contact on WhatsApp">
+                                            <MessageCircle size={18} />
+                                        </button>
+
                                         {order.status === OrderStatus.PENDING && (
                                             <button
                                                 onClick={() => handleStatusUpdate(order.orderId, OrderStatus.CONFIRMED)}

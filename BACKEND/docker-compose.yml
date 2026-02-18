@@ -6,8 +6,8 @@ services:
     container_name: postgres
     restart: always
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: auth_db
     ports:
       - "5432:5432"
@@ -22,7 +22,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8081
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8081:8081"
     depends_on:
@@ -37,7 +37,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8082
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8082:8082"
     depends_on:
@@ -52,7 +52,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8083
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8083:8083"
     depends_on:
@@ -67,7 +67,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8084
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
       SHOP_SERVICE_URL: http://shop-service:8082
       PRODUCT_SERVICE_URL: http://product-service:8083
       CUSTOMER_SERVICE_URL: http://customer-service:8085
@@ -86,7 +86,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8085
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8085:8085"
     depends_on:
@@ -102,7 +102,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8086
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
       SHOP_SERVICE_URL: http://shop-service:8082
     ports:
       - "8086:8086"
@@ -119,12 +119,49 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
       SERVER_PORT: 8087
-      JWT_SECRET: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      JWT_SECRET: ${JWT_SECRET}
     ports:
       - "8087:8087"
     depends_on:
       - postgres
       - auth-service
+
+  notification-service:
+    build: ./services/notification-service
+    container_name: notification-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8088
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8088:8088"
+    depends_on:
+      - postgres
+      - auth-service
+
+  media-service:
+    build: ./services/media-service
+    container_name: media-service
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/media_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      SERVER_PORT: 8089
+      JWT_SECRET: ${JWT_SECRET}
+      GCP_BUCKET_NAME: ${GCP_BUCKET_NAME}
+      GCP_PROJECT_ID: ${GCP_PROJECT_ID}
+      GOOGLE_APPLICATION_CREDENTIALS: /root/.config/gcloud/application_default_credentials.json
+    ports:
+      - "8089:8089"
+    depends_on:
+      - postgres
+      - auth-service
+    volumes:
+      - C:/Users/USER/AppData/Roaming/gcloud:/root/.config/gcloud
 
 
 volumes:

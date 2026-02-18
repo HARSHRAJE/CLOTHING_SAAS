@@ -1,15 +1,28 @@
 import React, { useEffect, useState } from 'react';
 import { Customer } from '../models/Customer';
 import { CustomerService } from '../services/CustomerService';
-import { Search } from 'lucide-react';
+import { Search, MessageCircle } from 'lucide-react';
+import { useAuth } from '../../auth-service/context/AuthContext';
+import { ShopService } from '../../shop-service/services/shop.service';
+import { sendWhatsAppNotification } from '../../notification-service/client';
 
 const CustomerList: React.FC = () => {
+    const { user } = useAuth();
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(0);
     const [search, setSearch] = useState('');
     const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [shopName, setShopName] = useState<string>('Our Store');
+
+    useEffect(() => {
+        if (user?.shopId) {
+            ShopService.getMyShop().then(shop => {
+                if (shop && shop.name) setShopName(shop.name);
+            }).catch(err => console.error("Failed to fetch shop name", err));
+        }
+    }, [user]);
 
     useEffect(() => {
         const timer = setTimeout(() => setDebouncedSearch(search), 500);
@@ -32,6 +45,30 @@ const CustomerList: React.FC = () => {
     useEffect(() => {
         fetchCustomers();
     }, [page, debouncedSearch]);
+
+    const handleContact = async (customer: Customer) => {
+        const phone = customer.phone;
+        if (!phone) {
+            alert("Customer phone number is missing");
+            return;
+        }
+
+        const message = `Hi ${customer.name}, welcome from ${shopName}.`;
+
+        try {
+            const response = await sendWhatsAppNotification(phone, message);
+            if (response && response.link) {
+                window.open(response.link, '_blank');
+            } else {
+                const encoded = encodeURIComponent(message);
+                window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+            }
+        } catch (error: any) {
+            console.error("Failed to generate WhatsApp link", error);
+            const encoded = encodeURIComponent(message);
+            window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+        }
+    };
 
     return (
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -60,6 +97,7 @@ const CustomerList: React.FC = () => {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -84,6 +122,13 @@ const CustomerList: React.FC = () => {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {new Date(customer.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <button
+                                                onClick={() => handleContact(customer)}
+                                                className="p-1 hover:bg-green-100 rounded text-green-600" title="Contact on WhatsApp">
+                                                <MessageCircle size={18} />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

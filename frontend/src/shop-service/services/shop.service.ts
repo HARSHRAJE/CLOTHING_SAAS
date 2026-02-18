@@ -40,6 +40,11 @@ export const ShopService = {
     return response.data;
   },
 
+  getMyShop: async (): Promise<Shop> => {
+    const response = await shopApi.get<Shop>(`/shops/me`);
+    return response.data;
+  },
+
   updateShop: async (shopId: string, data: UpdateShopRequest): Promise<Shop> => {
     const response = await shopApi.put<Shop>(`/admin/shops/${shopId}`, data);
     return response.data;

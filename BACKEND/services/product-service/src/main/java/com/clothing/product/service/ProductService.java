@@ -45,6 +45,7 @@ public class ProductService {
                 .price(request.getPrice())
                 .costPrice(request.getCostPrice())
                 .sku(request.getSku())
+                .imageUrl(request.getImageUrl())
                 .status(ProductStatus.ACTIVE)
                 .build();
 
@@ -121,6 +122,9 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setCostPrice(request.getCostPrice());
         product.setSku(request.getSku());
+        if (request.getImageUrl() != null) {
+            product.setImageUrl(request.getImageUrl());
+        }
 
         return mapToProductResponse(productRepository.save(product));
     }
@@ -203,6 +207,7 @@ public class ProductService {
                 .price(product.getPrice())
                 .costPrice(product.getCostPrice())
                 .sku(product.getSku())
+                .imageUrl(product.getImageUrl())
                 .status(product.getStatus())
                 .variants(product.getVariants() != null
                         ? product.getVariants().stream().map(this::mapToVariantResponse).collect(Collectors.toList())

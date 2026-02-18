@@ -43,6 +43,8 @@ public class Product {
 
     private String sku;
 
+    private String imageUrl; // Added: Image URL
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;

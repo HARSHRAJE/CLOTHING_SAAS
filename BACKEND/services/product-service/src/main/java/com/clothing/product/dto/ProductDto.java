@@ -38,6 +38,7 @@ public class ProductDto {
         private BigDecimal price;
         private BigDecimal costPrice;
         private String sku;
+        private String imageUrl;
     }
 
     @Data
@@ -49,6 +50,7 @@ public class ProductDto {
         private BigDecimal price;
         private BigDecimal costPrice;
         private String sku;
+        private String imageUrl;
     }
 
     @Data
@@ -62,6 +64,7 @@ public class ProductDto {
         private BigDecimal price;
         private BigDecimal costPrice;
         private String sku;
+        private String imageUrl;
         private ProductStatus status;
         private List<VariantResponse> variants;
         private LocalDateTime createdAt;
