@@ -44,6 +44,7 @@ public class Media {
 
     public enum EntityType {
         PRODUCT,
-        SHOP
+        SHOP,
+        VARIANT
     }
 }

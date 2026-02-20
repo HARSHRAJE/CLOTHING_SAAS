@@ -1,6 +1,8 @@
 package com.clothing.order.service;
 
 import com.clothing.order.dto.OrderDto;
+import com.clothing.order.event.OrderEvent;
+import com.clothing.order.event.OrderEventProducer;
 import com.clothing.order.model.*;
 import com.clothing.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CustomerService customerService;
     private final RestTemplate restTemplate;
+    private final OrderEventProducer orderEventProducer;
 
     @Value("${shop-service.url}")
     private String shopServiceUrl;
@@ -29,9 +32,6 @@ public class OrderService {
 
     @Value("${customer-service.url}")
     private String customerServiceUrl;
-
-    @Value("${analytics-service.url:http://analytics-service:8087}")
-    private String analyticsServiceUrl;
 
     @Transactional
     public OrderDto.OrderResponse createOrder(String shopSlug, OrderDto.CreateOrderRequest request) {
@@ -49,15 +49,13 @@ public class OrderService {
         Order order = Order.builder()
                 .shopId(shopId)
                 .customer(customer)
-                .orderNumber("ORD-" + System.currentTimeMillis()) // Simple generation
+                .orderNumber("ORD-" + System.currentTimeMillis())
                 .status(OrderStatus.PENDING)
                 .paymentStatus(PaymentStatus.PENDING)
                 .orderSource(request.getOrderSource())
-                .build(); // Don't save yet, need items
+                .build();
 
         for (OrderDto.OrderItemRequest itemRequest : request.getItems()) {
-            // Call Product Service to validate and get price
-            // GET /internal/products/{variantId}
             Map variantDetails = restTemplate
                     .getForObject(productServiceUrl + "/internal/products/" + itemRequest.getVariantId(), Map.class);
             if (variantDetails == null) {
@@ -69,11 +67,6 @@ public class OrderService {
                 throw new RuntimeException("Insufficient stock for variant: " + itemRequest.getVariantId());
             }
 
-            // Check product status? implied by variant details usually, but let's assume
-            // active if returned
-
-            // Reserve Stock
-            // POST /internal/products/variants/{variantId}/reserve
             Map<String, Object> reserveRequest = Map.of(
                     "quantity", itemRequest.getQuantity(),
                     "referenceId", order.getOrderNumber());
@@ -99,11 +92,10 @@ public class OrderService {
         }
 
         order.setTotalAmount(totalAmount);
-        order.setTaxAmount(BigDecimal.ZERO); // Calculate logic later
+        order.setTaxAmount(BigDecimal.ZERO);
         order.setDiscountAmount(BigDecimal.ZERO);
         order.setItems(orderItems);
 
-        // Fetch shipping address if customer is remote
         if (customer.getRemoteCustomerId() != null) {
             String address = customerService.getDefaultAddress(customer.getRemoteCustomerId());
             if (address != null) {
@@ -113,7 +105,7 @@ public class OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // 4. Update Customer Metrics & Activity (Async ideally, but sync for now)
+        // Update Customer Metrics (sync REST — needs immediate response)
         if (customer.getRemoteCustomerId() != null) {
             try {
                 updateCustomerMetrics(customer.getRemoteCustomerId(), savedOrder);
@@ -122,20 +114,35 @@ public class OrderService {
             }
         }
 
-        // 5. Record Analytics (Async ideally)
-        recordAnalytics(savedOrder);
+        // Publish Kafka event for analytics (replaces REST call)
+        publishOrderEvent(savedOrder);
 
         return mapToResponse(savedOrder);
     }
 
+    private void publishOrderEvent(Order order) {
+        OrderEvent event = OrderEvent.builder()
+                .eventType("CREATED")
+                .shopId(order.getShopId())
+                .orderId(order.getId())
+                .orderNumber(order.getOrderNumber())
+                .totalAmount(order.getTotalAmount())
+                .status(order.getStatus().name())
+                .items(order.getItems().stream().map(item -> OrderEvent.OrderItemEvent.builder()
+                        .productId(item.getProductId())
+                        .variantId(item.getVariantId())
+                        .quantity(item.getQuantity())
+                        .price(item.getPrice())
+                        .totalPrice(item.getTotalPrice())
+                        .build()).collect(Collectors.toList()))
+                .build();
+        orderEventProducer.publish(event);
+    }
+
     private void updateCustomerMetrics(UUID remoteCustomerId, Order order) {
-        // Update Metrics
-        // PUT /internal/customers/{customerId}/metrics
         Map<String, Object> metricsRequest = Map.of("orderAmount", order.getTotalAmount());
         restTemplate.put(customerServiceUrl + "/internal/customers/" + remoteCustomerId + "/metrics", metricsRequest);
 
-        // Add Activity
-        // POST /internal/customers/{customerId}/activity
         Map<String, Object> activityRequest = Map.of(
                 "shopId", order.getShopId(),
                 "activityType", "ORDER",
@@ -144,33 +151,7 @@ public class OrderService {
                 activityRequest);
     }
 
-    private void recordAnalytics(Order order) {
-        try {
-            // Record Order
-            Map<String, Object> orderRequest = Map.of(
-                    "shopId", order.getShopId(),
-                    "orderId", order.getId(),
-                    "amount", order.getTotalAmount(),
-                    "date", java.time.LocalDate.now().toString());
-            restTemplate.postForLocation(analyticsServiceUrl + "/internal/analytics/orders", orderRequest);
-
-            // Record Product Sales
-            for (OrderItem item : order.getItems()) {
-                Map<String, Object> saleRequest = Map.of(
-                        "shopId", order.getShopId(),
-                        "productId", item.getProductId(),
-                        "quantity", item.getQuantity(),
-                        "amount", item.getTotalPrice(),
-                        "date", java.time.LocalDate.now().toString());
-                restTemplate.postForLocation(analyticsServiceUrl + "/internal/analytics/product-sale", saleRequest);
-            }
-        } catch (Exception e) {
-            System.err.println("Failed to record analytics: " + e.getMessage());
-        }
-    }
-
     private UUID resolveShopId(String slug) {
-        // GET /internal/shops/slug/{slug}
         try {
             Map shop = restTemplate.getForObject(shopServiceUrl + "/internal/shops/slug/" + slug, Map.class);
             if (shop == null) {
@@ -220,11 +201,20 @@ public class OrderService {
         }
 
         order.setStatus(newStatus);
+        Order saved = orderRepository.save(order);
 
-        // Log history (optional but good)
-        // OrderStatusHistory history = ...
+        // Publish status change event
+        OrderEvent event = OrderEvent.builder()
+                .eventType("STATUS_CHANGED")
+                .shopId(saved.getShopId())
+                .orderId(saved.getId())
+                .orderNumber(saved.getOrderNumber())
+                .totalAmount(saved.getTotalAmount())
+                .status(newStatus.name())
+                .build();
+        orderEventProducer.publish(event);
 
-        return mapToResponse(orderRepository.save(order));
+        return mapToResponse(saved);
     }
 
     private OrderDto.OrderResponse mapToResponse(Order order) {

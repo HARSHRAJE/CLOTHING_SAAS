@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -20,10 +19,10 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<Page<CustomerDto.CustomerResponse>> getCustomers(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             @RequestParam(required = false) String search,
             Pageable pageable) {
-        UUID shopId = getShopId(authentication);
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(customerService.getCustomers(shopId, search, pageable));
     }
 
@@ -39,7 +38,6 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.updateCustomer(customerId, request));
     }
 
-    // Address APIs
     @PostMapping("/{customerId}/addresses")
     public ResponseEntity<CustomerDto.AddressResponse> addAddress(
             @PathVariable UUID customerId,
@@ -50,13 +48,5 @@ public class CustomerController {
     @GetMapping("/{customerId}/addresses")
     public ResponseEntity<Object> getAddresses(@PathVariable UUID customerId) {
         return ResponseEntity.ok(customerService.getAddresses(customerId));
-    }
-
-    private UUID getShopId(Authentication authentication) {
-        Object details = authentication.getDetails();
-        if (details instanceof String) {
-            return UUID.fromString((String) details);
-        }
-        throw new RuntimeException("Shop ID not found in token");
     }
 }

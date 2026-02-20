@@ -1,11 +1,33 @@
-# Build stage
-FROM eclipse-temurin:17-jdk-alpine AS build
+# ---- Build stage ----
+FROM gradle:8-jdk17-alpine AS builder
 WORKDIR /app
-COPY . .
-RUN ./gradlew build -x test --no-daemon
 
-# Run stage
+# 1. Copy only build config files first (cached until deps change)
+COPY build.gradle settings.gradle ./
+COPY gradle ./gradle
+
+# 2. Download dependencies (cached until build.gradle changes)
+RUN gradle dependencies --no-daemon || true
+
+# 3. Copy source code (only this re-runs on code changes)
+COPY src ./src
+RUN gradle build -x test --no-daemon
+
+# ---- Runtime stage ----
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+
+EXPOSE 8089
+
+USER appuser
+
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+  CMD wget -qO- http://localhost:8089/actuator/health || exit 1
+
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]

@@ -5,15 +5,18 @@ import com.clothing.product.model.*;
 import com.clothing.product.repository.CategoryRepository;
 import com.clothing.product.repository.ProductRepository;
 import com.clothing.product.repository.ProductVariantRepository;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -24,9 +27,11 @@ public class ProductService {
     private final ProductVariantRepository variantRepository;
     private final InventoryService inventoryService;
     private final org.springframework.web.client.RestTemplate restTemplate;
+    private final com.clothing.product.event.ProductEventProducer productEventProducer;
 
-    @org.springframework.beans.factory.annotation.Value("${analytics-service.url:http://analytics-service:8087}")
-    private String analyticsServiceUrl;
+    // -----------------------------------------------------------------------
+    // Product CRUD
+    // -----------------------------------------------------------------------
 
     @Transactional
     public ProductDto.ProductResponse createProduct(UUID shopId, ProductDto.CreateProductRequest request) {
@@ -44,22 +49,19 @@ public class ProductService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .costPrice(request.getCostPrice())
-                .sku(request.getSku())
-                .imageUrl(request.getImageUrl())
+
                 .status(ProductStatus.ACTIVE)
                 .build();
 
         Product saved = productRepository.save(product);
 
-        // Record Analytics
-        try {
-            java.util.Map<String, Object> analyticsRequest = java.util.Map.of(
-                    "shopId", saved.getShopId(),
-                    "date", java.time.LocalDate.now().toString());
-            restTemplate.postForLocation(analyticsServiceUrl + "/internal/analytics/products", analyticsRequest);
-        } catch (Exception e) {
-            System.err.println("Failed to record analytics: " + e.getMessage());
-        }
+        // Publish Kafka event for analytics (replaces REST call)
+        productEventProducer.publish(com.clothing.product.event.ProductEvent.builder()
+                .eventType("CREATED")
+                .shopId(saved.getShopId())
+                .productId(saved.getId())
+                .productName(saved.getName())
+                .build());
 
         return mapToProductResponse(saved);
     }
@@ -121,10 +123,6 @@ public class ProductService {
         product.setDescription(request.getDescription());
         product.setPrice(request.getPrice());
         product.setCostPrice(request.getCostPrice());
-        product.setSku(request.getSku());
-        if (request.getImageUrl() != null) {
-            product.setImageUrl(request.getImageUrl());
-        }
 
         return mapToProductResponse(productRepository.save(product));
     }
@@ -144,12 +142,12 @@ public class ProductService {
 
     @Transactional
     public void deleteProduct(UUID shopId, UUID productId) {
-        // Soft delete implementation: Set status to INACTIVE or use a deleted_at flag
-        // Reuse status update with check
         updateProductStatus(shopId, productId, ProductStatus.INACTIVE);
     }
 
-    // --- Variant Methods ---
+    // -----------------------------------------------------------------------
+    // Variant Methods
+    // -----------------------------------------------------------------------
 
     @Transactional
     public ProductDto.VariantResponse addVariant(UUID shopId, UUID productId, ProductDto.AddVariantRequest request) {
@@ -160,6 +158,9 @@ public class ProductService {
             throw new RuntimeException("Unauthorized: Product does not belong to this shop");
         }
 
+        // Build images from request URLs
+        List<VariantImage> images = buildVariantImages(request.getImageUrls());
+
         ProductVariant variant = ProductVariant.builder()
                 .shopId(product.getShopId())
                 .product(product)
@@ -167,6 +168,7 @@ public class ProductService {
                 .color(request.getColor())
                 .price(request.getPrice())
                 .stock(0) // Initial stock is 0, updated via InventoryService
+                .images(images)
                 .build();
 
         ProductVariant saved = variantRepository.save(variant);
@@ -176,7 +178,7 @@ public class ProductService {
             inventoryService.updateStock(product.getShopId(), saved.getId(), request.getStock(),
                     InventoryTransactionType.MANUAL,
                     "Initial Stock");
-            saved.setStock(request.getStock()); // Update local object for response
+            saved.setStock(request.getStock());
         }
 
         return mapToVariantResponse(saved);
@@ -184,7 +186,6 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public List<ProductDto.VariantResponse> getVariants(UUID shopId, UUID productId) {
-        // Verify product ownership first
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
@@ -197,6 +198,59 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Updates mutable fields of a variant and does a full replacement of its
+     * image gallery. Passing null or an empty list for {@code imageUrls} clears
+     * all existing images.
+     */
+    @Transactional
+    public ProductDto.VariantResponse updateVariant(UUID shopId, UUID variantId,
+            ProductDto.UpdateVariantRequest request) {
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new RuntimeException("Variant not found"));
+
+        if (!variant.getShopId().equals(shopId)) {
+            throw new RuntimeException("Unauthorized: Variant does not belong to this shop");
+        }
+
+        if (request.getSize() != null) {
+            variant.setSize(request.getSize());
+        }
+        if (request.getColor() != null) {
+            variant.setColor(request.getColor());
+        }
+        if (request.getPrice() != null) {
+            variant.setPrice(request.getPrice());
+        }
+
+        // Full replacement of the image gallery via orphanRemoval
+        variant.getImages().clear();
+        variant.getImages().addAll(buildVariantImages(request.getImageUrls()));
+
+        ProductVariant saved = variantRepository.save(variant);
+        return mapToVariantResponse(saved);
+    }
+
+    // -----------------------------------------------------------------------
+    // Private helpers
+    // -----------------------------------------------------------------------
+
+    /**
+     * Builds a list of {@link VariantImage} entities from a list of URL strings.
+     * The list index becomes the {@code displayOrder} (0 = hero/primary image).
+     */
+    private List<VariantImage> buildVariantImages(List<String> urls) {
+        if (urls == null || urls.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return IntStream.range(0, urls.size())
+                .mapToObj(i -> VariantImage.builder()
+                        .imageUrl(urls.get(i))
+                        .displayOrder(i)
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private ProductDto.ProductResponse mapToProductResponse(Product product) {
         return ProductDto.ProductResponse.builder()
                 .id(product.getId())
@@ -206,8 +260,7 @@ public class ProductService {
                 .description(product.getDescription())
                 .price(product.getPrice())
                 .costPrice(product.getCostPrice())
-                .sku(product.getSku())
-                .imageUrl(product.getImageUrl())
+
                 .status(product.getStatus())
                 .variants(product.getVariants() != null
                         ? product.getVariants().stream().map(this::mapToVariantResponse).collect(Collectors.toList())
@@ -227,6 +280,13 @@ public class ProductService {
     }
 
     private ProductDto.VariantResponse mapToVariantResponse(ProductVariant variant) {
+        // Collect image URLs ordered by displayOrder
+        List<String> imageUrls = variant.getImages() != null
+                ? variant.getImages().stream()
+                        .map(VariantImage::getImageUrl)
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
+
         return ProductDto.VariantResponse.builder()
                 .id(variant.getId())
                 .productId(variant.getProduct().getId())
@@ -234,6 +294,7 @@ public class ProductService {
                 .color(variant.getColor())
                 .price(variant.getPrice())
                 .stock(variant.getStock())
+                .imageUrls(imageUrls)
                 .build();
     }
 }

@@ -7,6 +7,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -37,6 +39,17 @@ public class ProductVariant {
 
     @Column(nullable = false)
     private Integer stock;
+
+    /**
+     * Ordered gallery images for this variant.
+     * Images are owned by this variant — deleting the variant deletes all its
+     * images.
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "variant_id")
+    @OrderBy("displayOrder ASC")
+    @Builder.Default
+    private List<VariantImage> images = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false)

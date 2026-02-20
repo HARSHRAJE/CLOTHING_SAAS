@@ -37,8 +37,8 @@ public class ProductDto {
         private String description;
         private BigDecimal price;
         private BigDecimal costPrice;
-        private String sku;
-        private String imageUrl;
+
+        // imageUrl removed — images are now managed per variant
     }
 
     @Data
@@ -49,8 +49,8 @@ public class ProductDto {
         private String description;
         private BigDecimal price;
         private BigDecimal costPrice;
-        private String sku;
-        private String imageUrl;
+
+        // imageUrl removed — images are now managed per variant
     }
 
     @Data
@@ -58,13 +58,13 @@ public class ProductDto {
     public static class ProductResponse {
         private UUID id;
         private UUID shopId;
-        private CategoryResponse category; // or just categoryId/name
+        private CategoryResponse category;
         private String name;
         private String description;
         private BigDecimal price;
         private BigDecimal costPrice;
-        private String sku;
-        private String imageUrl;
+
+        // imageUrl removed — images are now managed per variant
         private ProductStatus status;
         private List<VariantResponse> variants;
         private LocalDateTime createdAt;
@@ -78,6 +78,11 @@ public class ProductDto {
         private String color;
         private BigDecimal price;
         private Integer stock;
+        /**
+         * Ordered list of image URLs for this variant.
+         * Index 0 is treated as the primary/hero image.
+         */
+        private List<String> imageUrls;
     }
 
     @Data
@@ -86,6 +91,11 @@ public class ProductDto {
         private String size;
         private String color;
         private BigDecimal price;
+        /**
+         * Full replacement of the variant's image gallery.
+         * Pass null or an empty list to clear all images.
+         */
+        private List<String> imageUrls;
     }
 
     @Data
@@ -97,6 +107,8 @@ public class ProductDto {
         private String color;
         private BigDecimal price;
         private Integer stock;
+        /** Ordered gallery URLs (index 0 = hero image). */
+        private List<String> imageUrls;
     }
 
     @Data

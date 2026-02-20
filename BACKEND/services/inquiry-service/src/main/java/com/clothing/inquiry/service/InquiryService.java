@@ -21,12 +21,10 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final RestTemplate restTemplate;
+    private final com.clothing.inquiry.event.InquiryEventProducer inquiryEventProducer;
 
     @Value("${shop-service.url}")
     private String shopServiceUrl;
-
-    @Value("${analytics-service.url:http://analytics-service:8087}")
-    private String analyticsServiceUrl;
 
     // Public: Create Inquiry via Slug
     @Transactional
@@ -43,7 +41,9 @@ public class InquiryService {
                 .status(InquiryStatus.NEW)
                 .build();
 
-        return mapToResponse(inquiryRepository.save(inquiry));
+        Inquiry saved = inquiryRepository.save(inquiry);
+        publishInquiryEvent(saved);
+        return mapToResponse(saved);
     }
 
     // Internal: Create Inquiry
@@ -59,7 +59,19 @@ public class InquiryService {
                 .status(InquiryStatus.NEW)
                 .build();
 
-        return mapToResponse(inquiryRepository.save(inquiry));
+        Inquiry saved = inquiryRepository.save(inquiry);
+        publishInquiryEvent(saved);
+        return mapToResponse(saved);
+    }
+
+    private void publishInquiryEvent(Inquiry inquiry) {
+        inquiryEventProducer.publish(com.clothing.inquiry.event.InquiryEvent.builder()
+                .eventType("CREATED")
+                .shopId(inquiry.getShopId())
+                .inquiryId(inquiry.getId())
+                .customerName(inquiry.getCustomerName())
+                .phone(inquiry.getPhone())
+                .build());
     }
 
     // Owner: Get All

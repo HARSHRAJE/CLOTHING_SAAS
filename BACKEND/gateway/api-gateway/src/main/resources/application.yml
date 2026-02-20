@@ -1,0 +1,94 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Access-Control-Allow-Methods Access-Control-Allow-Headers, RETAIN_UNIQUE
+      # Route definitions
+      routes:
+        # Auth service — public (login/register), no JWT required
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/auth/**
+
+        # Shop service
+        - id: shop-service
+          uri: http://shop-service:8082
+          predicates:
+            - Path=/shops/**
+
+        # Product service
+        - id: product-service
+          uri: http://product-service:8083
+          predicates:
+            - Path=/products/**,/categories/**
+
+        # Order service
+        - id: order-service
+          uri: http://order-service:8084
+          predicates:
+            - Path=/orders/**
+
+        # Customer service
+        - id: customer-service
+          uri: http://customer-service:8085
+          predicates:
+            - Path=/customers/**
+
+        # Inquiry service
+        - id: inquiry-service
+          uri: http://inquiry-service:8086
+          predicates:
+            - Path=/inquiries/**
+
+        # Analytics service
+        - id: analytics-service
+          uri: http://analytics-service:8087
+          predicates:
+            - Path=/analytics/**
+
+        # Notification service
+        - id: notification-service
+          uri: http://notification-service:8088
+          predicates:
+            - Path=/notifications/**
+
+        # Media service
+        - id: media-service
+          uri: http://media-service:8089
+          predicates:
+            - Path=/media/**
+
+        # Public storefront — orders (must be before product catch-all)
+        - id: store-orders
+          uri: http://order-service:8084
+          predicates:
+            - Path=/store/*/orders/**
+
+        # Public storefront — inquiries
+        - id: store-inquiries
+          uri: http://inquiry-service:8086
+          predicates:
+            - Path=/store/*/inquiries/**
+
+        # Public storefront — products (catch-all)
+        - id: store-products
+          uri: http://product-service:8083
+          predicates:
+            - Path=/store/**
+
+# JWT config — same secret as auth-service
+jwt:
+  secret: ${JWT_SECRET}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

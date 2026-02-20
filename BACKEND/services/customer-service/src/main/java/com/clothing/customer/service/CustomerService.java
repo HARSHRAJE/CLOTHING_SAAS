@@ -25,10 +25,7 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final CustomerAddressRepository addressRepository;
     private final CustomerActivityRepository activityRepository;
-    private final org.springframework.web.client.RestTemplate restTemplate;
-
-    @org.springframework.beans.factory.annotation.Value("${analytics-service.url:http://analytics-service:8087}")
-    private String analyticsServiceUrl;
+    private final com.clothing.customer.event.CustomerEventProducer customerEventProducer;
 
     // Internal: Find by Phone
     public CustomerDto.CustomerResponse findByPhone(UUID shopId, String phone) {
@@ -55,15 +52,13 @@ public class CustomerService {
 
         Customer saved = customerRepository.save(customer);
 
-        // Record Analytics (Async ideally)
-        try {
-            java.util.Map<String, Object> analyticsRequest = java.util.Map.of(
-                    "shopId", saved.getShopId(),
-                    "date", java.time.LocalDate.now().toString());
-            restTemplate.postForLocation(analyticsServiceUrl + "/internal/analytics/customers", analyticsRequest);
-        } catch (Exception e) {
-            System.err.println("Failed to record analytics: " + e.getMessage());
-        }
+        // Publish Kafka event for analytics (replaces REST call)
+        customerEventProducer.publish(com.clothing.customer.event.CustomerEvent.builder()
+                .eventType("CREATED")
+                .shopId(saved.getShopId())
+                .customerId(saved.getId())
+                .customerName(saved.getName())
+                .build());
 
         return mapToResponse(saved);
     }

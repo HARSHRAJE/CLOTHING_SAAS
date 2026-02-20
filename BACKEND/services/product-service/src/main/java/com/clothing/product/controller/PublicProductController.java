@@ -19,18 +19,18 @@ import java.util.UUID;
 public class PublicProductController {
 
     private final ProductService productService;
-    private final RestTemplate restTemplate = new RestTemplate(); // Should be a Bean
+    private final RestTemplate restTemplate;
+
+    @org.springframework.beans.factory.annotation.Value("${shop-service.url:http://shop-service:8082}")
+    private String shopServiceUrl;
 
     @GetMapping("/{slug}")
     public ResponseEntity<List<ProductDto.ProductResponse>> getProductsBySlug(@PathVariable String slug) {
-        // Resolve slug -> shopId
-        // Assuming shop-service is at http://localhost:8082
-        // In Docker/K8s this would be http://shop-service:8082
-        String shopServiceUrl = "http://localhost:8082/store/" + slug;
+        String url = shopServiceUrl + "/store/" + slug;
 
         try {
             // Need a DTO or just parse Map to get ID
-            Map shop = restTemplate.getForObject(shopServiceUrl, Map.class);
+            Map shop = restTemplate.getForObject(url, Map.class);
             if (shop == null)
                 return ResponseEntity.notFound().build();
 

@@ -20,8 +20,8 @@ public class InventoryController {
     public ResponseEntity<Void> updateStock(
             @PathVariable UUID variantId,
             @RequestBody ProductDto.StockUpdateRequest request,
-            org.springframework.security.core.Authentication authentication) {
-        UUID shopId = UUID.fromString((String) authentication.getDetails());
+            @RequestHeader("X-Shop-Id") String shopIdHeader) {
+        UUID shopId = UUID.fromString(shopIdHeader);
         inventoryService.updateStock(shopId, variantId, request.getQuantityChange(), request.getType(),
                 request.getReferenceId());
         return ResponseEntity.ok().build();
@@ -30,8 +30,8 @@ public class InventoryController {
     @GetMapping("/{variantId}/inventory")
     public ResponseEntity<List<ProductDto.InventoryHistoryResponse>> getInventoryHistory(
             @PathVariable UUID variantId,
-            org.springframework.security.core.Authentication authentication) {
-        UUID shopId = UUID.fromString((String) authentication.getDetails());
+            @RequestHeader("X-Shop-Id") String shopIdHeader) {
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(inventoryService.getHistory(shopId, variantId));
     }
 }

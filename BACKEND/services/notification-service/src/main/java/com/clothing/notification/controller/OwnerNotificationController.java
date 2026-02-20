@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,65 +20,59 @@ public class OwnerNotificationController {
 
     @GetMapping
     public ResponseEntity<Page<NotificationDto.NotificationResponse>> getHistory(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             Pageable pageable) {
-        UUID shopId = getShopId(authentication);
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(notificationService.getNotificationHistory(shopId, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<NotificationDto.NotificationResponse> getDetails(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             @PathVariable UUID id) {
-        UUID shopId = getShopId(authentication);
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(notificationService.getNotificationDetails(shopId, id));
     }
 
     @PostMapping("/whatsapp")
     public ResponseEntity<NotificationDto.LinkResponse> sendWhatsApp(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             @RequestBody NotificationDto.WhatsAppRequest request) {
-        UUID shopId = getShopId(authentication);
-        request.setShopId(shopId); // Force security
+        UUID shopId = UUID.fromString(shopIdHeader);
+        request.setShopId(shopId);
         return ResponseEntity.ok(notificationService.sendWhatsAppNotification(request));
     }
 
     @PostMapping("/templates")
     public ResponseEntity<NotificationDto.TemplateResponse> createTemplate(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             @RequestBody NotificationDto.CreateTemplateRequest request) {
-        UUID shopId = getShopId(authentication);
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(notificationService.createTemplate(shopId, request));
     }
 
     @GetMapping("/templates")
     public ResponseEntity<List<NotificationDto.TemplateResponse>> getTemplates(
-            Authentication authentication) {
-        UUID shopId = getShopId(authentication);
+            @RequestHeader("X-Shop-Id") String shopIdHeader) {
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(notificationService.getTemplates(shopId));
     }
 
     @PutMapping("/templates/{id}")
     public ResponseEntity<NotificationDto.TemplateResponse> updateTemplate(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             @PathVariable UUID id,
             @RequestBody NotificationDto.CreateTemplateRequest request) {
-        UUID shopId = getShopId(authentication);
+        UUID shopId = UUID.fromString(shopIdHeader);
         return ResponseEntity.ok(notificationService.updateTemplate(shopId, id, request));
     }
 
     @DeleteMapping("/templates/{id}")
     public ResponseEntity<Void> deleteTemplate(
-            Authentication authentication,
+            @RequestHeader("X-Shop-Id") String shopIdHeader,
             @PathVariable UUID id) {
-        UUID shopId = getShopId(authentication);
+        UUID shopId = UUID.fromString(shopIdHeader);
         notificationService.deleteTemplate(shopId, id);
         return ResponseEntity.ok().build();
-    }
-
-    private UUID getShopId(Authentication authentication) {
-        // In Filter, we set details to shopId string
-        String shopIdStr = (String) authentication.getDetails();
-        return UUID.fromString(shopIdStr);
     }
 }

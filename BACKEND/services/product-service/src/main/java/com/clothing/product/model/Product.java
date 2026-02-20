@@ -41,10 +41,6 @@ public class Product {
 
     private BigDecimal costPrice;
 
-    private String sku;
-
-    private String imageUrl; // Added: Image URL
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ProductStatus status;
