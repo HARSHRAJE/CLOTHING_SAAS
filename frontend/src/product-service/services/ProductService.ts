@@ -1,6 +1,6 @@
 import { InventoryHistoryResponse, StockUpdateRequest } from '../models/Inventory';
 import { CreateProductRequest, Product, ProductStatus, UpdateProductRequest } from '../models/Product';
-import { AddVariantRequest, ProductVariant } from '../models/Variant';
+import { AddVariantRequest, ProductVariant, UpdateVariantRequest } from '../models/Variant';
 import { productApi } from './productApi';
 
 export const ProductService = {
@@ -45,6 +45,11 @@ export const ProductService = {
 
     addVariant: async (productId: string, data: AddVariantRequest): Promise<ProductVariant> => {
         const response = await productApi.post<ProductVariant>(`/products/${productId}/variants`, data);
+        return response.data;
+    },
+
+    updateVariant: async (variantId: string, data: UpdateVariantRequest): Promise<ProductVariant> => {
+        const response = await productApi.put<ProductVariant>(`/products/variants/${variantId}`, data);
         return response.data;
     },
 

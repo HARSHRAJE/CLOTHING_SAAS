@@ -15,10 +15,7 @@ export interface Product {
     description?: string;
     price: number;
     costPrice?: number;
-    sku: string;
-    stock: number;
     status: ProductStatus;
-    imageUrl?: string;
     variants?: ProductVariant[];
     createdAt?: string;
     updatedAt?: string;
@@ -30,9 +27,6 @@ export interface CreateProductRequest {
     description?: string;
     price: number;
     costPrice?: number;
-    sku: string;
-    stock?: number;
-    imageUrl?: string;
 }
 
 export interface UpdateProductRequest {
@@ -41,6 +35,4 @@ export interface UpdateProductRequest {
     description?: string;
     price?: number;
     costPrice?: number;
-    sku?: string;
-    imageUrl?: string;
 }

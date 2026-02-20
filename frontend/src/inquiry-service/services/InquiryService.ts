@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Inquiry, InquiryStatus } from '../models/Inquiry';
 
-const API_URL = 'http://localhost:8086';
+const API_URL = 'http://localhost:8080';
 
 export const inquiryApi = axios.create({
     baseURL: API_URL,

@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8089';
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 const mediaApi = axios.create({
-    baseURL: 'http://localhost:8089/media',
+    baseURL: 'http://localhost:8080/media',
 });
 
 mediaApi.interceptors.request.use((config) => {
@@ -21,13 +21,13 @@ export interface Media {
     url: string;
     fileType: string;
     size: number;
-    entityType: 'PRODUCT' | 'SHOP';
+    entityType: 'PRODUCT' | 'SHOP' | 'VARIANT';
     entityId: string;
     createdAt: string;
 }
 
 export const MediaService = {
-    uploadMedia: async (file: File, entityType: 'PRODUCT' | 'SHOP', entityId: string): Promise<Media> => {
+    uploadMedia: async (file: File, entityType: 'PRODUCT' | 'SHOP' | 'VARIANT', entityId: string): Promise<Media> => {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('entityType', entityType);
