@@ -29,7 +29,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 description: product.description,
                 price: product.price,
                 costPrice: product.costPrice,
-                sku: product.sku,
             });
         }
     }, [product, reset]);
@@ -107,16 +106,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 </div>
             </div>
 
-            {!product && (
-                <div>
-                    <label className="block text-sm font-medium text-gray-700">Initial Stock</label>
-                    <input
-                        type="number"
-                        {...register('stock', { min: 0 })}
-                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-                    />
-                </div>
-            )}
 
             <div>
                 <label className="block text-sm font-medium text-gray-700">Description</label>
