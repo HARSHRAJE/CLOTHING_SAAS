@@ -1,0 +1,272 @@
+name: Backend CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'BACKEND/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'BACKEND/**'
+
+jobs:
+  build-auth-service:
+    name: Build auth-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/auth-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-auth-${{ hashFiles('BACKEND/services/auth-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-auth-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-shop-service:
+    name: Build shop-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/shop-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-shop-${{ hashFiles('BACKEND/services/shop-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-shop-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-product-service:
+    name: Build product-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/product-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-product-${{ hashFiles('BACKEND/services/product-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-product-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-order-service:
+    name: Build order-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/order-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-order-${{ hashFiles('BACKEND/services/order-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-order-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-customer-service:
+    name: Build customer-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/customer-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-customer-${{ hashFiles('BACKEND/services/customer-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-customer-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-inquiry-service:
+    name: Build inquiry-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/inquiry-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-inquiry-${{ hashFiles('BACKEND/services/inquiry-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-inquiry-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-analytics-service:
+    name: Build analytics-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/analytics-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-analytics-${{ hashFiles('BACKEND/services/analytics-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-analytics-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-notification-service:
+    name: Build notification-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/notification-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-notification-${{ hashFiles('BACKEND/services/notification-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-notification-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-media-service:
+    name: Build media-service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/services/media-service
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-media-${{ hashFiles('BACKEND/services/media-service/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-media-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
+
+  build-api-gateway:
+    name: Build api-gateway
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: BACKEND/gateway/api-gateway
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-gateway-${{ hashFiles('BACKEND/gateway/api-gateway/**/*.gradle*') }}
+          restore-keys: ${{ runner.os }}-gradle-gateway-
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+      - name: Build with Gradle
+        run: ./gradlew build -x test --no-daemon
