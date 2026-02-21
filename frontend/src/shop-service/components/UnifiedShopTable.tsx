@@ -234,7 +234,7 @@ export default function UnifiedShopTable() {
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {owner ? (
                                                 <button
-                                                    onClick={() => handleOwnerStatusChange(owner.userId, owner.status)}
+                                                    onClick={() => handleOwnerStatusChange(owner.userId, owner.status ?? 'DISABLED')}
                                                     className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${owner.status === 'ACTIVE' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}
                                                     title="Click to toggle Owner Status"
                                                 >
