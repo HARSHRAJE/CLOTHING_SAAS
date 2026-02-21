@@ -47,14 +47,14 @@ export default function AnalyticsDashboard() {
     }
 
     return (
-        <div className="p-8 bg-gray-50 min-h-screen space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Analytics Dashboard</h1>
-                <p className="text-gray-500 mt-1">Overview of your shop's performance</p>
+        <div className="p-4 sm:p-8 bg-gray-50 min-h-screen space-y-8 w-full min-w-0 overflow-x-hidden">
+            <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight truncate">Analytics Dashboard</h1>
+                <p className="text-gray-500 mt-1 truncate">Overview of your shop's performance</p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                 <StatsCard
                     title="Total Revenue"
                     value={`$${data.totalRevenue.toFixed(2)}`}
@@ -82,10 +82,10 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Revenue Trend (Last 7 Days)</h2>
-                    <div className="h-[300px]">
+            <div className="grid grid-cols-1 gap-8 min-w-0 w-full">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 min-w-0 w-full overflow-hidden">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4 truncate">Revenue Trend (Last 7 Days)</h2>
+                    <div className="h-[250px] sm:h-[300px] w-full min-w-0">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={data.dailyMetrics}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -118,9 +118,9 @@ export default function AnalyticsDashboard() {
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Orders Trend (Last 7 Days)</h2>
-                    <div className="h-[300px]">
+                <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 min-w-0 w-full overflow-hidden">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-4 truncate">Orders Trend (Last 7 Days)</h2>
+                    <div className="h-[250px] sm:h-[300px] w-full min-w-0">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={data.dailyMetrics}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
@@ -148,11 +148,11 @@ export default function AnalyticsDashboard() {
             </div>
 
             {/* Top Products Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="px-6 py-5 border-b border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-900">Top Selling Products</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-0 w-full">
+                <div className="px-4 sm:px-6 py-5 border-b border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-900 truncate">Top Selling Products</h2>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto w-full">
                     <table className="w-full text-left text-gray-600">
                         <thead className="bg-gray-50 text-xs uppercase font-medium text-gray-500">
                             <tr>
@@ -164,8 +164,8 @@ export default function AnalyticsDashboard() {
                         <tbody className="divide-y divide-gray-100">
                             {data.topProducts.map((product) => (
                                 <tr key={product.productId} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 font-medium text-gray-900">{product.productName}</td>
-                                    <td className="px-6 py-4 text-right">{product.unitsSold}</td>
+                                    <td className="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] sm:max-w-xs">{product.productName}</td>
+                                    <td className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">{product.unitsSold}</td>
                                     <td className="px-6 py-4 text-right text-green-600 font-medium">${product.revenue.toFixed(2)}</td>
                                 </tr>
                             ))}
@@ -184,13 +184,13 @@ export default function AnalyticsDashboard() {
 
 function StatsCard({ title, value, icon, color }: { title: string; value: string; icon: React.ReactNode; color: string }) {
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4">
-            <div className={`p-3 rounded-lg ${color} shadow-md`}>
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 flex items-center space-x-4 min-w-0 w-full overflow-hidden">
+            <div className={`p-3 rounded-lg ${color} shadow-md flex-shrink-0`}>
                 {icon}
             </div>
-            <div>
-                <p className="text-sm font-medium text-gray-500">{title}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-0.5">{value}</p>
+            <div className="min-w-0 flex-1 overflow-hidden">
+                <p className="text-sm font-medium text-gray-500 truncate">{title}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5 truncate">{value}</p>
             </div>
         </div>
     );

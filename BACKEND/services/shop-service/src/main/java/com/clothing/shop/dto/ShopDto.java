@@ -5,6 +5,7 @@ import com.clothing.shop.model.ShopStatus;
 import lombok.Builder;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class ShopDto {
 
     @Data
     @Builder
-    public static class ShopResponse {
+    public static class ShopResponse implements Serializable {
         private UUID shopId;
         private String name;
         private String slug;
@@ -79,7 +80,7 @@ public class ShopDto {
 
     @Data
     @Builder
-    public static class PublicShopResponse {
+    public static class PublicShopResponse implements Serializable {
         private UUID shopId;
         private String name;
         private String slug;

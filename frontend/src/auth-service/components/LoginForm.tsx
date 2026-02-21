@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AuthService } from '../services/auth.service';
 import { useAuth } from '../context/AuthContext';
@@ -8,9 +8,16 @@ import Link from 'next/link';
 
 export default function LoginForm() {
     const { register, handleSubmit, formState: { errors } } = useForm();
-    const { login } = useAuth();
+    const { login, logout, user } = useAuth();
     const [apiError, setApiError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        // Automatically logout if the user arrives at the login page (e.g. via back button)
+        // We run this ONLY on mount to prevent logging the user out immediately after a successful login.
+        logout();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const onSubmit = async (data: any) => {
         setIsLoading(true);

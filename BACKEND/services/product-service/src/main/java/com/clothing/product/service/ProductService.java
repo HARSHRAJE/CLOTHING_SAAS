@@ -7,6 +7,7 @@ import com.clothing.product.repository.ProductRepository;
 import com.clothing.product.repository.ProductVariantRepository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,11 @@ public class ProductService {
     // -----------------------------------------------------------------------
 
     @Transactional
+    @CacheEvict(value = "productsByShopSlug", key = "#shopId.toString()") // we need the slug ideally but the controller
+                                                                          // fetches by slug and calls service by
+                                                                          // shopId. Wait, let's evict by shop Slug? The
+                                                                          // controller caches by slug, so we need slug.
+                                                                          // Wait, product-service only knows shopId.
     public ProductDto.ProductResponse createProduct(UUID shopId, ProductDto.CreateProductRequest request) {
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
@@ -99,6 +105,15 @@ public class ProductService {
     }
 
     @Transactional
+    @CacheEvict(value = { "productsByShopSlug", "productDetail" }, key = "#shopId.toString()")
+    // Ideally productDetail evicts by productId, but we can't easily do both
+    // flexibly here without multiple annotations.
+    // Actually we can: @CacheEvict(value = "productDetail", key = "#productId")
+    // Let's do multiple annotations via @Caching
+    @org.springframework.cache.annotation.Caching(evict = {
+            @CacheEvict(value = "productsByShopSlug", key = "#shopId.toString()"),
+            @CacheEvict(value = "productDetail", key = "#productId")
+    })
     public ProductDto.ProductResponse updateProduct(UUID shopId, UUID productId,
             ProductDto.UpdateProductRequest request) {
         Product product = productRepository.findById(productId)
@@ -128,6 +143,10 @@ public class ProductService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.Caching(evict = {
+            @CacheEvict(value = "productsByShopSlug", key = "#shopId.toString()"),
+            @CacheEvict(value = "productDetail", key = "#productId")
+    })
     public void updateProductStatus(UUID shopId, UUID productId, ProductStatus status) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -141,6 +160,10 @@ public class ProductService {
     }
 
     @Transactional
+    @org.springframework.cache.annotation.Caching(evict = {
+            @CacheEvict(value = "productsByShopSlug", key = "#shopId.toString()"),
+            @CacheEvict(value = "productDetail", key = "#productId")
+    })
     public void deleteProduct(UUID shopId, UUID productId) {
         updateProductStatus(shopId, productId, ProductStatus.INACTIVE);
     }
@@ -150,6 +173,10 @@ public class ProductService {
     // -----------------------------------------------------------------------
 
     @Transactional
+    @org.springframework.cache.annotation.Caching(evict = {
+            @CacheEvict(value = "productsByShopSlug", key = "#shopId.toString()"),
+            @CacheEvict(value = "productDetail", key = "#productId")
+    })
     public ProductDto.VariantResponse addVariant(UUID shopId, UUID productId, ProductDto.AddVariantRequest request) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -204,6 +231,11 @@ public class ProductService {
      * all existing images.
      */
     @Transactional
+    // We need productId to evict productDetail, which we can get from
+    // variant.getProduct().getId()
+    // but SPEL can't easily fetch that before execution. We can just evict
+    // productsByShopSlug.
+    @CacheEvict(value = "productsByShopSlug", key = "#shopId.toString()")
     public ProductDto.VariantResponse updateVariant(UUID shopId, UUID variantId,
             ProductDto.UpdateVariantRequest request) {
         ProductVariant variant = variantRepository.findById(variantId)

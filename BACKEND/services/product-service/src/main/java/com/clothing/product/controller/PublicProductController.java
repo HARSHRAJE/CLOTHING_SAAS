@@ -4,6 +4,7 @@ import com.clothing.product.dto.ProductDto;
 import com.clothing.product.model.ProductStatus;
 import com.clothing.product.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,7 @@ public class PublicProductController {
     private String shopServiceUrl;
 
     @GetMapping("/{slug}")
+    @Cacheable(value = "productsByShopSlug", key = "#slug")
     public ResponseEntity<List<ProductDto.ProductResponse>> getProductsBySlug(@PathVariable String slug) {
         String url = shopServiceUrl + "/store/" + slug;
 
@@ -50,6 +52,7 @@ public class PublicProductController {
     }
 
     @GetMapping("/{slug}/{productId}")
+    @Cacheable(value = "productDetail", key = "#productId")
     public ResponseEntity<ProductDto.ProductResponse> getProductDetail(
             @PathVariable String slug,
             @PathVariable UUID productId) {

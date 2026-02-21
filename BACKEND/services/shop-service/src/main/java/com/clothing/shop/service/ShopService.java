@@ -7,6 +7,8 @@ import com.clothing.shop.model.ShopStatus;
 import com.clothing.shop.repository.ShopRepository;
 import com.clothing.shop.repository.ShopSettingsRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -66,6 +68,7 @@ public class ShopService {
     }
 
     @Transactional
+    @CacheEvict(value = { "publicShops", "internalShops" }, key = "#result.slug")
     public ShopDto.ShopResponse updateShop(UUID shopId, ShopDto.UpdateShopRequest request) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
@@ -103,6 +106,7 @@ public class ShopService {
     }
 
     @Transactional
+    @CacheEvict(value = { "publicShops", "internalShops" }, key = "#result.slug")
     public ShopDto.ShopResponse updateMyShopBasicInfo(UUID shopId, String phone, String email) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
@@ -146,6 +150,7 @@ public class ShopService {
 
     // --- Public Operations ---
 
+    @Cacheable(value = "publicShops", key = "#slug")
     public ShopDto.PublicShopResponse getPublicShopBySlug(String slug) {
         Shop shop = shopRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
@@ -162,6 +167,7 @@ public class ShopService {
                 .build();
     }
 
+    @Cacheable(value = "internalShops", key = "#slug")
     public ShopDto.ShopResponse getInternalShopBySlug(String slug) {
         Shop shop = shopRepository.findBySlug(slug)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));

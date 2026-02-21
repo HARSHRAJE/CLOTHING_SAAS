@@ -1,107 +1,184 @@
 version: '3.8'
 
+# 1. Custom internal network for secure communication
+networks:
+  app-network:
+    driver: bridge
+
+# 2. Reusable extensions
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-spring-app: &spring-app
+  networks:
+    - app-network
+  logging: *default-logging
+  deploy:
+    resources:
+      limits:
+        memory: 768M
+      reservations:
+        memory: 256M
+  restart: unless-stopped
+
 services:
+  # ==========================================
+  # Infrastructure (Databases & Messaging)
+  # ==========================================
   postgres:
     image: postgres:15-alpine
     container_name: postgres
     restart: always
+    networks:
+      - app-network
+    logging: *default-logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: auth_db
-    ports:
-      - "5432:5432"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-auth_db}
+    # Removed ports directive for security. Only accessible on app-network.
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-auth_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    networks:
+      - app-network
+    logging: *default-logging
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
     restart: always
+    networks:
+      - app-network
+    logging: *default-logging
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   kafka:
     image: confluentinc/cp-kafka:7.5.0
     container_name: kafka
     restart: always
-    ports:
-      - "9092:9092"
+    networks:
+      - app-network
+    logging: *default-logging
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx512M -Xms256M" # Recommended JVM limits for Kafka
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 29092 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
 
+  # ==========================================
+  # Microservices
+  # ==========================================
   api-gateway:
+    <<: *spring-app
     build: ./gateway/api-gateway
     container_name: api-gateway
-    restart: always
     environment:
       SERVER_PORT: 8080
       JWT_SECRET: ${JWT_SECRET}
     ports:
-      - "8080:8080"
+      - "8080:8080" # Exposed to the host
     depends_on:
-      - auth-service
+      auth-service:
+        condition: service_started
 
   auth-service:
+    <<: *spring-app
     build: ./services/auth-service
     container_name: auth-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/auth_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8081
       JWT_SECRET: ${JWT_SECRET}
-    ports:
-      - "8081:8081"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   shop-service:
+    <<: *spring-app
     build: ./services/shop-service
     container_name: shop-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/shop_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8082
       JWT_SECRET: ${JWT_SECRET}
+      REDIS_HOST: redis
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   product-service:
+    <<: *spring-app
     build: ./services/product-service
     container_name: product-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/product_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8083
       JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      REDIS_HOST: redis
     depends_on:
-      - postgres
-      - kafka
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
   order-service:
+    <<: *spring-app
     build: ./services/order-service
     container_name: order-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/order_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8084
       JWT_SECRET: ${JWT_SECRET}
       SHOP_SERVICE_URL: http://shop-service:8082
@@ -109,92 +186,109 @@ services:
       CUSTOMER_SERVICE_URL: http://customer-service:8085
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - postgres
-      - auth-service
-      - kafka
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   customer-service:
+    <<: *spring-app
     build: ./services/customer-service
     container_name: customer-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/customer_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8085
       JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - postgres
-      - auth-service
-      - kafka
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   inquiry-service:
+    <<: *spring-app
     build: ./services/inquiry-service
     container_name: inquiry-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/inquiry_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8086
       JWT_SECRET: ${JWT_SECRET}
       SHOP_SERVICE_URL: http://shop-service:8082
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - postgres
-      - auth-service
-      - kafka
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   analytics-service:
+    <<: *spring-app
     build: ./services/analytics-service
     container_name: analytics-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/analytics_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8087
       JWT_SECRET: ${JWT_SECRET}
       KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
-      - postgres
-      - auth-service
-      - kafka
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
 
   notification-service:
+    <<: *spring-app
     build: ./services/notification-service
     container_name: notification-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8088
       JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - postgres
-      - auth-service
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
 
   media-service:
+    <<: *spring-app
     build: ./services/media-service
     container_name: media-service
-    restart: always
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/media_db
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8089
       JWT_SECRET: ${JWT_SECRET}
       GCP_BUCKET_NAME: ${GCP_BUCKET_NAME}
       GCP_PROJECT_ID: ${GCP_PROJECT_ID}
       GOOGLE_APPLICATION_CREDENTIALS: /app/gcloud/application_default_credentials.json
     depends_on:
-      - postgres
-      - auth-service
+      postgres:
+        condition: service_healthy
+      auth-service:
+        condition: service_started
     volumes:
       - C:/Users/USER/AppData/Roaming/gcloud:/app/gcloud:ro
 
 
 volumes:
   postgres_data:
+  redis_data:
