@@ -89,7 +89,7 @@ export default function OwnerList() {
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{owner.email}</td>
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         <button
-                                            onClick={() => handleStatusChange(owner.userId, owner.status)}
+                                            onClick={() => handleStatusChange(owner.userId, owner.status ?? 'DISABLED')}
                                             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${owner.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
                                         >
                                             {owner.status}
