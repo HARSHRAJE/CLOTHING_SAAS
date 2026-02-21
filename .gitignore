@@ -10,7 +10,10 @@
 build/
 !gradle/wrapper/gradle-wrapper.jar
 out/
+# Environment variables
 .env
+.env.*
+!.env.example
 .apt_generated
 .classpath
 .factorypath

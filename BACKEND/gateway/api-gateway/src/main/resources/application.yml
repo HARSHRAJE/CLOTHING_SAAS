@@ -7,8 +7,15 @@ spring:
 
   cloud:
     gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
       default-filters:
-        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials Access-Control-Allow-Methods Access-Control-Allow-Headers, RETAIN_UNIQUE
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials, RETAIN_UNIQUE
       # Route definitions
       routes:
         # Auth service — public (login/register), no JWT required
