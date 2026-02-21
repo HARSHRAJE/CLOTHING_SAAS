@@ -5,22 +5,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Component;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Slf4j
-@Component
+@RestController
+@RequestMapping("/analytics/events")
 @RequiredArgsConstructor
-public class AnalyticsEventConsumer {
+public class AnalyticsEventController {
 
     private final AnalyticsService analyticsService;
     private final ObjectMapper objectMapper;
 
-    @KafkaListener(topics = "order-events", groupId = "analytics-group")
-    public void consumeOrderEvent(String message) {
+    @PostMapping("/order")
+    public ResponseEntity<Void> consumeOrderEvent(@RequestBody String message) {
         try {
             JsonNode event = objectMapper.readTree(message);
             String eventType = event.get("eventType").asText();
@@ -43,13 +44,15 @@ public class AnalyticsEventConsumer {
 
                 log.info("Recorded order analytics for shopId={}", shopId);
             }
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Failed to consume order event: {}", e.getMessage(), e);
+            log.error("Failed to process order event: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @KafkaListener(topics = "product-events", groupId = "analytics-group")
-    public void consumeProductEvent(String message) {
+    @PostMapping("/product")
+    public ResponseEntity<Void> consumeProductEvent(@RequestBody String message) {
         try {
             JsonNode event = objectMapper.readTree(message);
             String eventType = event.get("eventType").asText();
@@ -59,13 +62,15 @@ public class AnalyticsEventConsumer {
                 analyticsService.recordProductAdded(shopId);
                 log.info("Recorded product-added analytics for shopId={}", shopId);
             }
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Failed to consume product event: {}", e.getMessage(), e);
+            log.error("Failed to process product event: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @KafkaListener(topics = "customer-events", groupId = "analytics-group")
-    public void consumeCustomerEvent(String message) {
+    @PostMapping("/customer")
+    public ResponseEntity<Void> consumeCustomerEvent(@RequestBody String message) {
         try {
             JsonNode event = objectMapper.readTree(message);
             String eventType = event.get("eventType").asText();
@@ -75,13 +80,15 @@ public class AnalyticsEventConsumer {
                 analyticsService.recordNewCustomer(shopId);
                 log.info("Recorded new-customer analytics for shopId={}", shopId);
             }
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Failed to consume customer event: {}", e.getMessage(), e);
+            log.error("Failed to process customer event: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
-    @KafkaListener(topics = "inquiry-events", groupId = "analytics-group")
-    public void consumeInquiryEvent(String message) {
+    @PostMapping("/inquiry")
+    public ResponseEntity<Void> consumeInquiryEvent(@RequestBody String message) {
         try {
             JsonNode event = objectMapper.readTree(message);
             String eventType = event.get("eventType").asText();
@@ -91,8 +98,10 @@ public class AnalyticsEventConsumer {
                 analyticsService.recordInquiry(shopId);
                 log.info("Recorded inquiry analytics for shopId={}", shopId);
             }
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            log.error("Failed to consume inquiry event: {}", e.getMessage(), e);
+            log.error("Failed to process inquiry event: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().build();
         }
     }
 }

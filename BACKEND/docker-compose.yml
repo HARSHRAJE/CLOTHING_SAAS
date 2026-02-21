@@ -48,61 +48,7 @@ services:
       timeout: 5s
       retries: 5
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis
-    restart: always
-    networks:
-      - app-network
-    logging: *default-logging
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
-    restart: always
-    networks:
-      - app-network
-    logging: *default-logging
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    healthcheck:
-      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka
-    restart: always
-    networks:
-      - app-network
-    logging: *default-logging
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_HEAP_OPTS: "-Xmx512M -Xms256M" # Recommended JVM limits for Kafka
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "nc -z localhost 29092 || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
 
   # ==========================================
   # Microservices
@@ -144,13 +90,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8082
       JWT_SECRET: ${JWT_SECRET}
-      REDIS_HOST: redis
     depends_on:
       postgres:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-
+      auth-service:
+        condition: service_started
   product-service:
     <<: *spring-app
     build: ./services/product-service
@@ -161,14 +105,9 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8083
       JWT_SECRET: ${JWT_SECRET}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
-      REDIS_HOST: redis
+      ANALYTICS_SERVICE_URL: http://analytics-service:8087
     depends_on:
       postgres:
-        condition: service_healthy
-      kafka:
-        condition: service_healthy
-      redis:
         condition: service_healthy
 
   order-service:
@@ -184,14 +123,12 @@ services:
       SHOP_SERVICE_URL: http://shop-service:8082
       PRODUCT_SERVICE_URL: http://product-service:8083
       CUSTOMER_SERVICE_URL: http://customer-service:8085
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ANALYTICS_SERVICE_URL: http://analytics-service:8087
     depends_on:
       postgres:
         condition: service_healthy
       auth-service:
         condition: service_started
-      kafka:
-        condition: service_healthy
 
   customer-service:
     <<: *spring-app
@@ -203,14 +140,12 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8085
       JWT_SECRET: ${JWT_SECRET}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ANALYTICS_SERVICE_URL: http://analytics-service:8087
     depends_on:
       postgres:
         condition: service_healthy
       auth-service:
         condition: service_started
-      kafka:
-        condition: service_healthy
 
   inquiry-service:
     <<: *spring-app
@@ -223,14 +158,12 @@ services:
       SERVER_PORT: 8086
       JWT_SECRET: ${JWT_SECRET}
       SHOP_SERVICE_URL: http://shop-service:8082
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      ANALYTICS_SERVICE_URL: http://analytics-service:8087
     depends_on:
       postgres:
         condition: service_healthy
       auth-service:
         condition: service_started
-      kafka:
-        condition: service_healthy
 
   analytics-service:
     <<: *spring-app
@@ -242,14 +175,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       SERVER_PORT: 8087
       JWT_SECRET: ${JWT_SECRET}
-      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
     depends_on:
       postgres:
         condition: service_healthy
       auth-service:
         condition: service_started
-      kafka:
-        condition: service_healthy
 
   notification-service:
     <<: *spring-app
@@ -291,4 +221,3 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
