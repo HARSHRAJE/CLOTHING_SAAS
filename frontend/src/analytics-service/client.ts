@@ -1,7 +1,7 @@
 import axios from "axios";
 import { DashboardSummary } from "./types";
 
-const ANALYTICS_SERVICE_URL = process.env.NEXT_PUBLIC_ANALYTICS_SERVICE_URL || "http://localhost:8080";
+const ANALYTICS_SERVICE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const apiClient = axios.create({
     baseURL: ANALYTICS_SERVICE_URL,

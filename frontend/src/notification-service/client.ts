@@ -6,7 +6,7 @@ import axios from "axios";
 // However, the dashboard seems to use direct ports or a configured base URL.
 // Let's rely on an env variable or default to localhost:8088 for now, similar to other services.
 
-const API_URL = process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL || "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 export const notificationClient = axios.create({
     baseURL: API_URL,

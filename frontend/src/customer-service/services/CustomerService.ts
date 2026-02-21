@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Customer, CustomerAddress } from '../models/Customer';
 
-const API_URL = 'http://localhost:8080';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 // Create a specific instance for Customer Service
 export const customerApi = axios.create({

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
 import { ShoppingBag, ArrowLeft, Plus, Minus, Trash2, Send, Store, Package, Search, X, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const API = 'http://localhost:8080';
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 interface Variant {
     id: string;
