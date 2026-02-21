@@ -16,7 +16,7 @@ export default function LoginForm() {
         // Automatically logout if the user arrives at the login page (e.g. via back button)
         // We run this ONLY on mount to prevent logging the user out immediately after a successful login.
         logout();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps.
     }, []);
 
     const onSubmit = async (data: any) => {
