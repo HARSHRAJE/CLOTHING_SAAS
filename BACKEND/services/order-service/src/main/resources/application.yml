@@ -2,17 +2,17 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/order_db
-    username: postgres
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/order_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: ${JPA_DDL_AUTO:update}
+    show-sql: ${JPA_SHOW_SQL:false}
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     producer:
@@ -20,18 +20,18 @@ spring:
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 server:
-  port: 8084
+  port: ${SERVER_PORT:8084}
 
 application:
   security:
     jwt:
-      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
 
 shop-service:
-  url: http://localhost:8082
+  url: ${SHOP_SERVICE_URL:http://localhost:8082}
 
 product-service:
-  url: http://localhost:8083 # internal API port
+  url: ${PRODUCT_SERVICE_URL:http://localhost:8083}
 
 customer-service:
-  url: http://localhost:8085
+  url: ${CUSTOMER_SERVICE_URL:http://localhost:8085}
