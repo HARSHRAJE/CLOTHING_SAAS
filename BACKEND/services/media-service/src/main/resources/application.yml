@@ -25,8 +25,8 @@ jwt:
   secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
 
 gcp:
-  bucket-name: ${GCP_BUCKET_NAME:clothind_saas}
-  project-id: ${GCP_PROJECT_ID:project-487b1c28-a9ba-47d0-850}
+  bucket-name: ${GCP_BUCKET_NAME:saas-media-bucket}
+  project-id: ${GCP_PROJECT_ID:clothing-saas}
 
 logging:
   level:
