@@ -10,4 +10,8 @@ public class InquiryApplication {
         SpringApplication.run(InquiryApplication.class, args);
     }
 
+    @org.springframework.context.annotation.Bean
+    public org.springframework.web.client.RestTemplate restTemplate() {
+        return new org.springframework.web.client.RestTemplate();
+    }
 }
