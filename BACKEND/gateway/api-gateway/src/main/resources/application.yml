@@ -28,7 +28,7 @@ spring:
         - id: shop-service
           uri: ${SHOP_SERVICE_URL:http://localhost:8082}
           predicates:
-            - Path=/shops/**
+            - Path=/shops/**,/admin/shops/**
 
         # Product service
         - id: product-service
