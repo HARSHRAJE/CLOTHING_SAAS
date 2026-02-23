@@ -23,7 +23,7 @@ ENV HOME=/tmp
 COPY --from=builder /app/build/libs/*-0.0.1-SNAPSHOT.jar app.jar
 RUN rm -f /app/build/libs/*-plain.jar 2>/dev/null || true
 
-ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
+ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XX:+UseG1GC -Duser.home=/tmp"
 
 EXPOSE 8089
 
