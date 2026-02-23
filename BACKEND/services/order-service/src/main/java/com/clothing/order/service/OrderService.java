@@ -81,9 +81,17 @@ public class OrderService {
             Map<String, Object> reserveRequest = Map.of(
                     "quantity", itemRequest.getQuantity(),
                     "referenceId", order.getOrderNumber());
-            restTemplate.postForEntity(
+
+            org.springframework.http.HttpHeaders reserveHeaders = new org.springframework.http.HttpHeaders();
+            reserveHeaders.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<Map<String, Object>> reserveEntity = new org.springframework.http.HttpEntity<>(
+                    reserveRequest, reserveHeaders);
+
+            restTemplate.exchange(
                     productServiceUrl + "/internal/products/variants/" + itemRequest.getVariantId() + "/reserve",
-                    reserveRequest, Void.class);
+                    org.springframework.http.HttpMethod.POST,
+                    reserveEntity,
+                    Void.class);
 
             BigDecimal price = new BigDecimal(variantDetails.get("price").toString());
             BigDecimal itemTotal = price.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));

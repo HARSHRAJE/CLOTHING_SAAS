@@ -35,6 +35,13 @@ public class InternalCustomerController {
         return ResponseEntity.ok(customerService.createCustomer(request));
     }
 
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerDto.CustomerResponse> updateCustomer(
+            @PathVariable UUID customerId,
+            @RequestBody CustomerDto.UpdateCustomerRequest request) {
+        return ResponseEntity.ok(customerService.updateCustomer(customerId, request));
+    }
+
     @PutMapping("/{customerId}/metrics")
     public ResponseEntity<Void> updateMetrics(
             @PathVariable UUID customerId,
