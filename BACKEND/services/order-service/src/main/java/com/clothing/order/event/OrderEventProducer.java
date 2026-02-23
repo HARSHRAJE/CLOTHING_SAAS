@@ -15,14 +15,22 @@ public class OrderEventProducer {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    @Value("${analytics-service.url:http://analytics-service:8087}")
+    @Value("${ANALYTICS_SERVICE_URL:http://localhost:8087}")
     private String analyticsServiceUrl;
+
+    @Value("${internal.api.key}")
+    private String internalApiKey;
 
     public void publish(OrderEvent event) {
         try {
             String json = objectMapper.writeValueAsString(event);
             String url = analyticsServiceUrl + "/analytics/events/order";
-            restTemplate.postForObject(url, json, String.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            headers.setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(json,
+                    headers);
+            restTemplate.exchange(url, org.springframework.http.HttpMethod.POST, entity, String.class);
             log.debug("Sent order event to analytics service: {}", json);
         } catch (Exception e) {
             log.error("Failed to send order event to analytics service: {}", e.getMessage(), e);

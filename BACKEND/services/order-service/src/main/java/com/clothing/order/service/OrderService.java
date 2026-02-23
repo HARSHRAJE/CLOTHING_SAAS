@@ -24,14 +24,17 @@ public class OrderService {
     private final RestTemplate restTemplate;
     private final OrderEventProducer orderEventProducer;
 
-    @Value("${shop-service.url}")
+    @Value("${SHOP_SERVICE_URL:http://localhost:8082}")
     private String shopServiceUrl;
 
-    @Value("${product-service.url}")
+    @Value("${PRODUCT_SERVICE_URL:http://localhost:8083}")
     private String productServiceUrl;
 
-    @Value("${customer-service.url}")
+    @Value("${CUSTOMER_SERVICE_URL:http://localhost:8085}")
     private String customerServiceUrl;
+
+    @Value("${internal.api.key}")
+    private String internalApiKey;
 
     @Transactional
     public OrderDto.OrderResponse createOrder(String shopSlug, OrderDto.CreateOrderRequest request) {
@@ -56,8 +59,16 @@ public class OrderService {
                 .build();
 
         for (OrderDto.OrderItemRequest itemRequest : request.getItems()) {
-            Map variantDetails = restTemplate
-                    .getForObject(productServiceUrl + "/internal/products/" + itemRequest.getVariantId(), Map.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+
+            org.springframework.http.ResponseEntity<Map> response = restTemplate.exchange(
+                    productServiceUrl + "/internal/products/" + itemRequest.getVariantId(),
+                    org.springframework.http.HttpMethod.GET,
+                    entity,
+                    Map.class);
+            Map variantDetails = response.getBody();
             if (variantDetails == null) {
                 throw new RuntimeException("Variant not found: " + itemRequest.getVariantId());
             }
@@ -140,20 +151,37 @@ public class OrderService {
     }
 
     private void updateCustomerMetrics(UUID remoteCustomerId, Order order) {
+        org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+        headers.set("X-Internal-Api-Key", internalApiKey);
+
         Map<String, Object> metricsRequest = Map.of("orderAmount", order.getTotalAmount());
-        restTemplate.put(customerServiceUrl + "/internal/customers/" + remoteCustomerId + "/metrics", metricsRequest);
+        org.springframework.http.HttpEntity<Map<String, Object>> metricsEntity = new org.springframework.http.HttpEntity<>(
+                metricsRequest, headers);
+        restTemplate.exchange(customerServiceUrl + "/internal/customers/" + remoteCustomerId + "/metrics",
+                org.springframework.http.HttpMethod.PUT, metricsEntity, Void.class);
 
         Map<String, Object> activityRequest = Map.of(
                 "shopId", order.getShopId(),
                 "activityType", "ORDER",
                 "referenceId", order.getOrderNumber());
-        restTemplate.postForLocation(customerServiceUrl + "/internal/customers/" + remoteCustomerId + "/activity",
-                activityRequest);
+        org.springframework.http.HttpEntity<Map<String, Object>> activityEntity = new org.springframework.http.HttpEntity<>(
+                activityRequest, headers);
+        restTemplate.exchange(customerServiceUrl + "/internal/customers/" + remoteCustomerId + "/activity",
+                org.springframework.http.HttpMethod.POST, activityEntity, Void.class);
     }
 
     private UUID resolveShopId(String slug) {
         try {
-            Map shop = restTemplate.getForObject(shopServiceUrl + "/internal/shops/slug/" + slug, Map.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+
+            org.springframework.http.ResponseEntity<Map> response = restTemplate.exchange(
+                    shopServiceUrl + "/internal/shops/slug/" + slug,
+                    org.springframework.http.HttpMethod.GET,
+                    entity,
+                    Map.class);
+            Map shop = response.getBody();
             if (shop == null) {
                 throw new RuntimeException("Shop not found for slug: " + slug);
             }

@@ -13,8 +13,11 @@ public class CustomerService {
     private final CustomerRepository customerRepository;
     private final org.springframework.web.client.RestTemplate restTemplate;
 
-    @org.springframework.beans.factory.annotation.Value("${customer-service.url}")
+    @org.springframework.beans.factory.annotation.Value("${CUSTOMER_SERVICE_URL:http://localhost:8085}")
     private String customerServiceUrl;
+
+    @org.springframework.beans.factory.annotation.Value("${internal.api.key}")
+    private String internalApiKey;
 
     @Transactional
     public Customer findOrCreateCustomer(java.util.UUID shopId, String name, String phone, String email) {
@@ -28,7 +31,12 @@ public class CustomerService {
             // GET /internal/customers?shopId={shopId}&phone={phone}
             String url = customerServiceUrl + "/internal/customers?shopId=" + shopId + "&phone=" + phone;
             System.out.println("OrderService: Syncing customer. URL: " + url);
-            java.util.Map response = restTemplate.getForObject(url, java.util.Map.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+            org.springframework.http.ResponseEntity<java.util.Map> responseEntity = restTemplate.exchange(url,
+                    org.springframework.http.HttpMethod.GET, entity, java.util.Map.class);
+            java.util.Map response = responseEntity.getBody();
             if (response != null && response.get("customerId") != null) {
                 remoteId = java.util.UUID.fromString((String) response.get("customerId"));
             }
@@ -39,8 +47,14 @@ public class CustomerService {
                     "name", name,
                     "phone", phone,
                     "email", email != null ? email : "");
-            java.util.Map response = restTemplate.postForObject(customerServiceUrl + "/internal/customers", request,
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<java.util.Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(
+                    request, headers);
+            org.springframework.http.ResponseEntity<java.util.Map> responseEntity = restTemplate.exchange(
+                    customerServiceUrl + "/internal/customers", org.springframework.http.HttpMethod.POST, entity,
                     java.util.Map.class);
+            java.util.Map response = responseEntity.getBody();
 
             if (response != null && response.get("customerId") != null) {
                 remoteId = java.util.UUID.fromString((String) response.get("customerId"));
@@ -57,7 +71,12 @@ public class CustomerService {
                 java.util.Map<String, Object> updateRequest = java.util.Map.of(
                         "name", name,
                         "email", email != null ? email : "");
-                restTemplate.put(customerServiceUrl + "/internal/customers/" + remoteId, updateRequest);
+                org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+                headers.set("X-Internal-Api-Key", internalApiKey);
+                org.springframework.http.HttpEntity<java.util.Map<String, Object>> entity = new org.springframework.http.HttpEntity<>(
+                        updateRequest, headers);
+                restTemplate.exchange(customerServiceUrl + "/internal/customers/" + remoteId,
+                        org.springframework.http.HttpMethod.PUT, entity, Void.class);
                 System.out.println("OrderService: Synced customer details for: " + remoteId);
             } catch (Exception e) {
                 System.err.println("Failed to sync details: " + e.getMessage());
@@ -84,7 +103,12 @@ public class CustomerService {
     public String getDefaultAddress(java.util.UUID remoteCustomerId) {
         try {
             String url = customerServiceUrl + "/customers/" + remoteCustomerId + "/addresses";
-            java.util.List<java.util.Map> addresses = restTemplate.getForObject(url, java.util.List.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+            org.springframework.http.ResponseEntity<java.util.List> responseEntity = restTemplate.exchange(url,
+                    org.springframework.http.HttpMethod.GET, entity, java.util.List.class);
+            java.util.List<java.util.Map> addresses = responseEntity.getBody();
 
             if (addresses != null && !addresses.isEmpty()) {
                 // Find default or first
