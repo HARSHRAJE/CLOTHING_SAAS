@@ -32,7 +32,7 @@ steps:
       - '3000'
 
 substitutions:
-  _GAR_URL: 'asia-south1-docker.pkg.dev/project-487b1c28-a9ba-47d0-850/clothing-saas-repo'
+  _GAR_URL: 'asia-south1-docker.pkg.dev/project-487b1c28-a9ba-47d0-850/cloud-run-source-deploy'
   _SERVICE_NAME: 'frontend'
   _REGION: 'asia-south1'
   _API_URL: 'https://api-gateway-507952736973.asia-south1.run.app'
