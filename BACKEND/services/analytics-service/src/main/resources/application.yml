@@ -27,3 +27,8 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+internal:
+  api:
+    key: ${INTERNAL_API_KEY:B72dIOHFTiuQuS*H1O2%ftapijQN7usYO@v%*WA&xt0!QI%Z%GieAkzzsIV$c6Zp}
+

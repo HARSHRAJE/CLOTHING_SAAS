@@ -28,3 +28,8 @@ application:
       expiration: ${JWT_EXPIRATION:86400000}
       refresh-token:
         expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+
+internal:
+  api:
+    key: ${INTERNAL_API_KEY:B72dIOHFTiuQuS*H1O2%ftapijQN7usYO@v%*WA&xt0!QI%Z%GieAkzzsIV$c6Zp}
+

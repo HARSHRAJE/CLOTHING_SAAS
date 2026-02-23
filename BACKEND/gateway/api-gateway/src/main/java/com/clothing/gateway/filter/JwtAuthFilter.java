@@ -24,6 +24,9 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     @Value("${jwt.secret}")
     private String secret;
 
+    @Value("${internal.api.key}")
+    private String internalApiKey;
+
     /**
      * Paths that do NOT require authentication.
      */
@@ -38,14 +41,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-        // Skip authentication for open paths
-        if (isOpenPath(path)) {
-            return chain.filter(exchange);
-        }
+        // Always inject the Internal API Key into the request headers for downstream authentication
+        ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate()
+                .header("X-Internal-Api-Key", internalApiKey);
 
-        // Allow media view endpoints (used by <img> tags, no JWT)
-        if (path.matches("/media/.+/view")) {
-            return chain.filter(exchange);
+        // Skip JWT authentication for open paths but STILL pass the internal API key
+        if (isOpenPath(path) || path.matches("/media/.+/view")) {
+            return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
         }
 
         // Extract Authorization header
@@ -60,14 +62,13 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             Claims claims = extractAllClaims(token);
 
             // Enrich the request with user info headers for downstream services
-            ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
+            requestBuilder
                     .header("X-User-Email", claims.getSubject())
                     .header("X-User-Role", claims.get("role", String.class))
                     .header("X-Shop-Id", claims.get("shopId", String.class))
-                    .header("X-User-Id", claims.get("userId", String.class))
-                    .build();
+                    .header("X-User-Id", claims.get("userId", String.class));
 
-            return chain.filter(exchange.mutate().request(mutatedRequest).build());
+            return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
         } catch (Exception e) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();

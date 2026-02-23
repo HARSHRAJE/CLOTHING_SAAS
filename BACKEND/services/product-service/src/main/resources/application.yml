@@ -25,3 +25,8 @@ application:
   security:
     jwt:
       secret-key: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+
+internal:
+  api:
+    key: ${INTERNAL_API_KEY:B72dIOHFTiuQuS*H1O2%ftapijQN7usYO@v%*WA&xt0!QI%Z%GieAkzzsIV$c6Zp}
+
