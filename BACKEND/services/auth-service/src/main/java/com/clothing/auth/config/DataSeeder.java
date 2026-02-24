@@ -22,13 +22,13 @@ public class DataSeeder {
         return args -> {
             if (userRepository.count() == 0) {
                 User admin = User.builder()
-                        .email("admin@saas.com")
-                        .passwordHash(passwordEncoder.encode("password123"))
+                        .email("clothadminsaas@admin.com")
+                        .passwordHash(passwordEncoder.encode("09h24m@123"))
                         .role(Role.SUPER_ADMIN)
                         .status(Status.ACTIVE)
                         .build();
                 userRepository.save(admin);
-                System.out.println("Default Admin User Created: admin@saas.com / password123");
+                System.out.println("Default Admin User Created: clothadminsaas@admin.com / 09h24m@123");
             }
         };
     }
