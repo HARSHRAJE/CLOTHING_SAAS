@@ -35,6 +35,13 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(shopId, id));
     }
 
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<org.springframework.data.domain.Page<OrderDto.OrderResponse>> getOrdersByCustomer(
+            @PathVariable UUID customerId,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(orderService.getOrdersByCustomerId(customerId, pageable));
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<OrderDto.OrderResponse> updateStatus(
             @RequestHeader("X-Shop-Id") String shopIdHeader,

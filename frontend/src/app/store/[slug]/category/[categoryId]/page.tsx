@@ -24,6 +24,7 @@ interface Product {
     description?: string;
     price: number;
     status: string;
+    category?: { id: string; name: string };
     variants?: Variant[];
 }
 
@@ -66,7 +67,10 @@ export default function CategoryPage() {
 
             // 3. Get all products and filter by categoryId
             const prodRes = await axios.get(`${API}/store/products/${slug}`);
-            const categoryProducts = prodRes.data.filter((p: any) => p.category?.id === categoryId);
+            // Ensure comparison works with UUID strings
+            const categoryProducts = prodRes.data.filter((p: any) =>
+                p.category?.id === categoryId || p.category?.id?.toString() === categoryId
+            );
             setProducts(categoryProducts);
 
         } catch (err) {
@@ -192,7 +196,7 @@ export default function CategoryPage() {
                                 const isLowStock = hasStock && (product.variants?.[0]?.stock || 0) <= 5;
 
                                 return (
-                                    <div key={product.id} className="group relative flex flex-col gap-3">
+                                    <Link key={product.id} href={`/store/${slug}/product/${product.id}`} className="group relative flex flex-col gap-3">
                                         {/* Image Container */}
                                         <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden w-full">
                                             {heroImg ? (
@@ -223,9 +227,9 @@ export default function CategoryPage() {
 
                                         {/* Product Info */}
                                         <div className="flex flex-col gap-1.5 px-1">
-                                            <h3 className="text-[14px] font-medium text-gray-800 tracking-wide">{product.name}</h3>
+                                            <h3 className="text-[14px] font-medium text-gray-800 tracking-wide group-hover:text-[#cba258] transition-colors">{product.name}</h3>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {(product.price * 2.5).toLocaleString()}</span>
+                                                <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {(product.price * 1.5).toLocaleString()}</span>
                                                 <span className="text-[14px] font-bold text-[#dc2626] font-mono">Rs. {product.price.toLocaleString()}</span>
                                             </div>
 
@@ -234,11 +238,10 @@ export default function CategoryPage() {
                                                 <div className="w-3.5 h-3.5 rounded-full bg-black border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
                                                 <div className="w-3.5 h-3.5 rounded-full bg-white border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
                                                 <div className="w-3.5 h-3.5 rounded-full bg-red-800 border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
-                                                <div className="w-3.5 h-3.5 rounded-full bg-green-700 border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
                                                 <span className="text-[10px] font-bold text-gray-500 ml-1">+ 2</span>
                                             </div>
                                         </div>
-                                    </div>
+                                    </Link>
                                 );
                             })}
                         </div>

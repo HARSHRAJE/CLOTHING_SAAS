@@ -63,7 +63,9 @@ public class OrderDto {
         private UUID id;
         private UUID productId;
         private UUID variantId;
-        private String productName; // Might need to fetch from Product Service or store snapshot
+        private String productName;
+        private String size;
+        private String color;
         private Integer quantity;
         private BigDecimal price;
         private BigDecimal totalPrice;

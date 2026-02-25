@@ -108,10 +108,12 @@ public class ShopService {
 
     @Transactional
     @CacheEvict(value = { "publicShops", "internalShops" }, key = "#result.slug")
-    public ShopDto.ShopResponse updateMyShopBasicInfo(UUID shopId, String phone, String email) {
+    public ShopDto.ShopResponse updateMyShopBasicInfo(UUID shopId, String name, String phone, String email) {
         Shop shop = shopRepository.findById(shopId)
                 .orElseThrow(() -> new RuntimeException("Shop not found"));
 
+        if (name != null)
+            shop.setName(name);
         if (phone != null)
             shop.setPhone(phone);
         if (email != null)

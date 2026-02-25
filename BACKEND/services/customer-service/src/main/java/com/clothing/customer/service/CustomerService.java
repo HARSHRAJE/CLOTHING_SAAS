@@ -69,10 +69,20 @@ public class CustomerService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
+        if (customer.getTotalOrders() == null)
+            customer.setTotalOrders(0);
+        if (customer.getTotalSpent() == null)
+            customer.setTotalSpent(BigDecimal.ZERO);
+        if (customer.getLoyaltyPoints() == null)
+            customer.setLoyaltyPoints(0);
+
         customer.setTotalOrders(customer.getTotalOrders() + 1);
-        customer.setTotalSpent(customer.getTotalSpent().add(request.getOrderAmount()));
+
+        BigDecimal orderAmount = request.getOrderAmount() != null ? request.getOrderAmount() : BigDecimal.ZERO;
+        customer.setTotalSpent(customer.getTotalSpent().add(orderAmount));
+
         // Simple loyalty logic: 1 point per 100 spent
-        int points = request.getOrderAmount().divideToIntegralValue(BigDecimal.valueOf(100)).intValue();
+        int points = orderAmount.divideToIntegralValue(BigDecimal.valueOf(100)).intValue();
         customer.setLoyaltyPoints(customer.getLoyaltyPoints() + points);
 
         customerRepository.save(customer);

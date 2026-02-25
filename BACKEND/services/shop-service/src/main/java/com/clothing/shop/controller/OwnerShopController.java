@@ -25,7 +25,11 @@ public class OwnerShopController {
             @RequestHeader("X-Shop-Id") String shopIdStr,
             @RequestBody ShopDto.UpdateShopRequest request) {
         return ResponseEntity
-                .ok(shopService.updateMyShopBasicInfo(UUID.fromString(shopIdStr), request.getPhone(), null));
+                .ok(shopService.updateMyShopBasicInfo(
+                        UUID.fromString(shopIdStr),
+                        request.getName(),
+                        request.getPhone(),
+                        request.getEmail()));
     }
 
     @GetMapping("/settings")

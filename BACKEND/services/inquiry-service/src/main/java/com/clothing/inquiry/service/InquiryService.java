@@ -23,8 +23,11 @@ public class InquiryService {
     private final RestTemplate restTemplate;
     private final com.clothing.inquiry.event.InquiryEventProducer inquiryEventProducer;
 
-    @Value("${shop-service.url}")
+    @Value("${SHOP_SERVICE_URL:http://localhost:8082}")
     private String shopServiceUrl;
+
+    @Value("${internal.api.key}")
+    private String internalApiKey;
 
     // Public: Create Inquiry via Slug
     @Transactional
@@ -125,8 +128,16 @@ public class InquiryService {
 
     private UUID resolveShopId(String slug) {
         try {
-            // GET /internal/shops/slug/{slug}
-            Map shop = restTemplate.getForObject(shopServiceUrl + "/internal/shops/slug/" + slug, Map.class);
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+
+            org.springframework.http.ResponseEntity<Map> response = restTemplate.exchange(
+                    shopServiceUrl + "/internal/shops/slug/" + slug,
+                    org.springframework.http.HttpMethod.GET,
+                    entity,
+                    Map.class);
+            Map shop = response.getBody();
             if (shop == null || shop.get("shopId") == null) {
                 throw new RuntimeException("Shop not found");
             }

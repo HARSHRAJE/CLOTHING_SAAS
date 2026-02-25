@@ -36,6 +36,10 @@ public class OrderItem {
     @Column(nullable = false)
     private UUID variantId;
 
+    private String productName;
+    private String size;
+    private String color;
+
     private Integer quantity;
     private BigDecimal price; // Price per unit at time regarding
     private BigDecimal totalPrice; // quantity * price

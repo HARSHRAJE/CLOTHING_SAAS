@@ -27,23 +27,26 @@ export default function SettingsForm() {
     const fetchShopDetails = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('token');
-            // Assuming the owner-specific shop endpoint or fetching via slug if we have it
-            // We use the authenticated endpoint to get full details
-            const res = await axios.get(`${API}/shop/owner/details`, {
+            const token = localStorage.getItem('accessToken');
+            // Fetch basic shop info
+            const basicRes = await axios.get(`${API}/shops/me`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
+            // Fetch shop settings
+            const settingsRes = await axios.get(`${API}/shops/me/settings`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
             setShopDetails({
-                name: res.data.name || '',
-                slug: res.data.slug || '',
-                phone: res.data.phone || '',
-                email: res.data.email || '',
-                address: res.data.address || '',
-                instagramUrl: res.data.instagramUrl || ''
+                name: basicRes.data.name || '',
+                slug: basicRes.data.slug || '',
+                phone: basicRes.data.phone || '',
+                email: basicRes.data.email || '',
+                address: settingsRes.data.address || '',
+                instagramUrl: settingsRes.data.instagramUrl || ''
             });
         } catch (error) {
             console.error('Failed to fetch shop details', error);
-            // Fallback: try by slug if endpoint differs
         } finally {
             setLoading(false);
         }
@@ -55,12 +58,11 @@ export default function SettingsForm() {
 
         try {
             setSaving(true);
-            const token = localStorage.getItem('token');
+            const token = localStorage.getItem('accessToken');
 
-            // PUT request to update shop details
-            await axios.put(`${API}/shop/owner/update`, {
+            // Consolidated PATCH request to update everything in one go
+            await axios.patch(`${API}/shops/me`, {
                 name: shopDetails.name,
-                slug: shopDetails.slug,
                 phone: shopDetails.phone,
                 email: shopDetails.email,
                 address: shopDetails.address,

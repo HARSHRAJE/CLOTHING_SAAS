@@ -148,6 +148,7 @@ export default function LandingPage() {
             });
             setOrderSuccess(true);
             setCart([]);
+            setOrderForm({ customerName: '', phone: '', email: '' });
         } catch {
             alert('Failed to place order. Please try again.');
         } finally {

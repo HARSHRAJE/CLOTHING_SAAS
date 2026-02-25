@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { Customer } from '../models/Customer';
 import { CustomerService } from '../services/CustomerService';
 import { Search, MessageCircle } from 'lucide-react';
@@ -111,7 +112,12 @@ const CustomerList: React.FC = () => {
                                 customers.map((customer) => (
                                     <tr key={customer.customerId} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-gray-900">{customer.name}</div>
+                                            <Link
+                                                href={`/owner/customers/${customer.customerId}`}
+                                                className="text-sm font-bold text-gray-900 hover:text-indigo-600 transition-colors"
+                                            >
+                                                {customer.name}
+                                            </Link>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm text-gray-900">{customer.phone}</div>

@@ -102,6 +102,9 @@ public class OrderService {
                     .order(order)
                     .productId(UUID.fromString((String) variantDetails.get("productId")))
                     .variantId(itemRequest.getVariantId())
+                    .productName((String) variantDetails.get("productName"))
+                    .size((String) variantDetails.get("size"))
+                    .color((String) variantDetails.get("color"))
                     .quantity(itemRequest.getQuantity())
                     .price(price)
                     .totalPrice(itemTotal)
@@ -206,6 +209,11 @@ public class OrderService {
         return orderRepository.findByShopId(shopId, pageable).map(this::mapToResponse);
     }
 
+    public org.springframework.data.domain.Page<OrderDto.OrderResponse> getOrdersByCustomerId(UUID customerId,
+            org.springframework.data.domain.Pageable pageable) {
+        return orderRepository.findByCustomerRemoteCustomerId(customerId, pageable).map(this::mapToResponse);
+    }
+
     public OrderDto.OrderResponse getOrderById(UUID shopId, UUID orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
@@ -282,6 +290,9 @@ public class OrderService {
                 .id(item.getId())
                 .productId(item.getProductId())
                 .variantId(item.getVariantId())
+                .productName(item.getProductName())
+                .size(item.getSize())
+                .color(item.getColor())
                 .quantity(item.getQuantity())
                 .price(item.getPrice())
                 .totalPrice(item.getTotalPrice())

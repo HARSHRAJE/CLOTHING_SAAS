@@ -23,6 +23,8 @@ export interface OrderItem {
     productId: string;
     variantId: string;
     productName: string;
+    size: string;
+    color: string;
     quantity: number;
     price: number;
     totalPrice: number;

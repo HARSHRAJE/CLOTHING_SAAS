@@ -34,6 +34,9 @@ public class InternalProductController {
         return ResponseEntity.ok(VariantInternalResponse.builder()
                 .variantId(variant.getId())
                 .productId(product.getId())
+                .productName(product.getName())
+                .size(variant.getSize())
+                .color(variant.getColor())
                 .price(variant.getPrice() != null ? variant.getPrice() : product.getPrice())
                 .availableStock(variant.getStock())
                 .status(product.getStatus().name())
@@ -58,6 +61,9 @@ public class InternalProductController {
     static class VariantInternalResponse {
         private UUID variantId;
         private UUID productId;
+        private String productName;
+        private String size;
+        private String color;
         private BigDecimal price;
         private Integer availableStock;
         private String status;
