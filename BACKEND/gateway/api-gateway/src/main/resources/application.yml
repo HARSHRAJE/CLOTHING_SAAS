@@ -84,6 +84,12 @@ spring:
           predicates:
             - Path=/store/*/inquiries/**
 
+        # Public storefront - shop details
+        - id: store-shop-details
+          uri: ${SHOP_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/store/{slug}
+
         # Public storefront — products (catch-all)
         - id: store-products
           uri: ${PRODUCT_SERVICE_URL:http://localhost:8083}
@@ -104,4 +110,5 @@ management:
 internal:
   api:
     key: ${INTERNAL_API_KEY:B72dIOHFTiuQuS*H1O2%ftapijQN7usYO@v%*WA&xt0!QI%Z%GieAkzzsIV$c6Zp}
+
 

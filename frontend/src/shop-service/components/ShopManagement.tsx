@@ -48,6 +48,12 @@ export default function ShopManagement({ onShopCreated }: { onShopCreated?: (id:
                     {errors.slug && <span className="text-red-500 text-sm">Required</span>}
                 </div>
 
+                {/* Instagram URL */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Instagram URL</label>
+                    <input type="url" {...register('instagramUrl')} placeholder="https://instagram.com/yourshop" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2" />
+                </div>
+
                 {/* Phone */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Phone</label>

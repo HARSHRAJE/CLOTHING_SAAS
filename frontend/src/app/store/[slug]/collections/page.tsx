@@ -247,8 +247,8 @@ export default function CollectionsPage() {
                                         key={pageNum}
                                         onClick={() => setCurrentPage(pageNum)}
                                         className={`w-6 h-6 flex items-center justify-center transition-colors ${currentPage === pageNum
-                                                ? 'text-black border-b border-black'
-                                                : 'text-gray-400 hover:text-black'
+                                            ? 'text-black border-b border-black'
+                                            : 'text-gray-400 hover:text-black'
                                             }`}
                                     >
                                         {pageNum}
@@ -285,20 +285,6 @@ export default function CollectionsPage() {
                                                         No Image
                                                     </div>
                                                 )}
-
-                                                {/* Top Left Tags */}
-                                                <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 w-fit">
-                                                    <span className="bg-[#1a1a1a] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase">New</span>
-                                                    <span className="bg-[#dc2626] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase">Sale</span>
-                                                    <span className="bg-white text-gray-800 text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase border-r-2 border-r-[#dc2626]">
-                                                        -18%
-                                                    </span>
-                                                    {isLowStock && (
-                                                        <span className="bg-[#facc15] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase mt-1">
-                                                            Low Stock
-                                                        </span>
-                                                    )}
-                                                </div>
 
                                                 {/* Top Right Action Icons */}
                                                 <div className="absolute top-3 right-3 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
@@ -344,8 +330,8 @@ export default function CollectionsPage() {
                                                 key={pageNum}
                                                 onClick={() => setCurrentPage(pageNum)}
                                                 className={`w-10 h-10 flex items-center justify-center border transition-colors ${currentPage === pageNum
-                                                        ? 'bg-black text-white border-black'
-                                                        : 'border-gray-300 text-gray-600 hover:border-black'
+                                                    ? 'bg-black text-white border-black'
+                                                    : 'border-gray-300 text-gray-600 hover:border-black'
                                                     }`}
                                             >
                                                 {pageNum}

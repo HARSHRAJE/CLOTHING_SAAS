@@ -20,6 +20,7 @@ public class ShopDto {
         private ShopPlan plan;
         private LocalDate subscriptionStartDate;
         private LocalDate subscriptionEndDate;
+        private String instagramUrl;
     }
 
     @Data

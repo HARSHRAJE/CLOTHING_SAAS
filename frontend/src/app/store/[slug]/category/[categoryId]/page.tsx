@@ -57,12 +57,10 @@ export default function CategoryPage() {
 
             // 1. Get Shop ID
             const shopRes = await axios.get(`${API}/store/${slug}`);
-            const shopId = shopRes.data.id;
+            const shopId = shopRes.data.shopId;
 
             // 2. Get Categories to find the current one's name
-            const catsRes = await axios.get(`${API}/products/categories`, {
-                headers: { 'X-Shop-Id': shopId }
-            });
+            const catsRes = await axios.get(`${API}/store/products/${slug}/categories`);
             const currentCat = catsRes.data.find((c: Category) => c.id === categoryId);
             if (currentCat) setCategory(currentCat);
 
@@ -208,20 +206,6 @@ export default function CategoryPage() {
                                                     No Image
                                                 </div>
                                             )}
-
-                                            {/* Top Left Tags */}
-                                            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 w-fit">
-                                                <span className="bg-[#1a1a1a] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase">New</span>
-                                                <span className="bg-[#dc2626] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase">Sale</span>
-                                                <span className="bg-white text-gray-800 text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase border-r-2 border-r-[#dc2626]">
-                                                    -6{Math.floor(Math.random() * 9) + 1}%
-                                                </span>
-                                                {isLowStock && (
-                                                    <span className="bg-[#facc15] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase mt-1">
-                                                        Low Stock
-                                                    </span>
-                                                )}
-                                            </div>
 
                                             {/* Top Right Action Icons */}
                                             <div className="absolute top-3 right-3 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">

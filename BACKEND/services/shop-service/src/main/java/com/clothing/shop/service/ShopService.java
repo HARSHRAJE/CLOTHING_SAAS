@@ -51,6 +51,7 @@ public class ShopService {
                 .shopId(savedShop.getId())
                 .themeColor("#000000")
                 .currency("INR")
+                .instagramUrl(request.getInstagramUrl())
                 .build();
         shopSettingsRepository.save(settings);
 

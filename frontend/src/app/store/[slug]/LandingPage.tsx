@@ -86,9 +86,7 @@ export default function LandingPage() {
             });
 
             // 2. Fetch categories for this shop
-            const catsRes = await axios.get(`${API}/products/categories`, {
-                headers: { 'X-Shop-Id': shopId }
-            });
+            const catsRes = await axios.get(`${API}/store/products/${slug}/categories`);
             setCategories(catsRes.data);
 
             // 3. Keep products for now for cart/checkout purposes
@@ -586,14 +584,26 @@ export default function LandingPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
                         {filteredCategories.slice(0, 3).map(category => {
+                            // Find the first product that belongs to this category and has an image
+                            const firstProductWithImage = products.find(p => p.category?.id === category.id && p.variants?.[0]?.imageUrls?.[0]);
+                            const categoryImage = firstProductWithImage ? getImageUrl(firstProductWithImage.variants![0].imageUrls![0]) : null;
+
                             return (
                                 <Link key={category.id} href={`/store/${slug}/category/${category.id}`}
                                     className="group text-left focus:outline-none w-full block">
-                                    {/* Abstract placeholder container for Category image */}
+                                    {/* Category Image or Abstract placeholder */}
                                     <div className="aspect-[4/5] bg-gray-100 overflow-hidden relative mb-6">
-                                        <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-200 flex items-center justify-center group-hover:scale-105 transition-transform duration-700 ease-in-out">
-                                            <Store className="w-12 h-12 text-gray-300" />
-                                        </div>
+                                        {categoryImage ? (
+                                            <img
+                                                src={categoryImage}
+                                                alt={category.name}
+                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-200 flex items-center justify-center group-hover:scale-105 transition-transform duration-700 ease-in-out">
+                                                <Store className="w-12 h-12 text-gray-300" />
+                                            </div>
+                                        )}
                                         {/* Subtle luxury overlay */}
                                         <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 

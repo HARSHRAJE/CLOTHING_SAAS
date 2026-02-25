@@ -29,6 +29,7 @@ export interface CreateShopRequest {
   plan: ShopPlan;
   subscriptionStartDate: string;
   subscriptionEndDate: string;
+  instagramUrl?: string;
 }
 
 export interface UpdateShopRequest {

@@ -20,6 +20,7 @@ import java.util.UUID;
 public class PublicProductController {
 
     private final ProductService productService;
+    private final com.clothing.product.service.CategoryService categoryService;
     private final RestTemplate restTemplate;
 
     @org.springframework.beans.factory.annotation.Value("${SHOP_SERVICE_URL:http://localhost:8082}")
@@ -50,6 +51,36 @@ public class PublicProductController {
             // Fetch active products for this shop
             return ResponseEntity
                     .ok(productService.getProducts(shopId, ProductStatus.ACTIVE, Pageable.unpaged()).getContent());
+
+        } catch (org.springframework.web.client.HttpClientErrorException e) {
+            System.err.println("Shop internal call failed: " + e.getStatusCode() + " " + e.getResponseBodyAsString());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{slug}/categories")
+    @Cacheable(value = "categoriesByShopSlug", key = "#slug")
+    public ResponseEntity<List<ProductDto.CategoryResponse>> getCategoriesBySlug(@PathVariable String slug) {
+        String url = shopServiceUrl + "/store/" + slug;
+
+        try {
+            org.springframework.http.HttpHeaders headers = new org.springframework.http.HttpHeaders();
+            headers.set("X-Internal-Api-Key", internalApiKey);
+            org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(url, org.springframework.http.HttpMethod.GET, entity,
+                    Map.class);
+            Map shop = response.getBody();
+            if (shop == null)
+                return ResponseEntity.notFound().build();
+
+            String shopIdStr = (String) shop.get("shopId");
+            UUID shopId = UUID.fromString(shopIdStr);
+
+            return ResponseEntity.ok(categoryService.getCategories(shopId));
 
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             System.err.println("Shop internal call failed: " + e.getStatusCode() + " " + e.getResponseBodyAsString());
