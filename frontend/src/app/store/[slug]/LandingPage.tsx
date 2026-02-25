@@ -103,6 +103,12 @@ export default function LandingPage() {
         fetchData();
     }, [slug]);
 
+    useEffect(() => {
+        if (orderSuccess || showOrder || showCart) {
+            window.scrollTo(0, 0);
+        }
+    }, [orderSuccess, showOrder, showCart]);
+
     const addToCart = (product: Product, variant: Variant) => {
         const existing = cart.find(c => c.variantId === variant.id);
         if (existing) {
@@ -149,7 +155,10 @@ export default function LandingPage() {
             setOrderSuccess(true);
             setCart([]);
             setOrderForm({ customerName: '', phone: '', email: '' });
-        } catch {
+            setShowOrder(false);
+            setShowCart(false);
+        } catch (err: any) {
+            console.error("Order placement failed:", err);
             alert('Failed to place order. Please try again.');
         } finally {
             setSubmitting(false);

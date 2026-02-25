@@ -46,6 +46,15 @@ public class ShopDto {
     }
 
     @Data
+    public static class ConsolidatedShopUpdateRequest {
+        private String name;
+        private String phone;
+        private String email;
+        private String address;
+        private String instagramUrl;
+    }
+
+    @Data
     public static class UpdateStatusRequest {
         private ShopStatus status;
     }

@@ -32,6 +32,13 @@ public class OwnerShopController {
                         request.getEmail()));
     }
 
+    @PatchMapping
+    public ResponseEntity<ShopDto.ShopResponse> patchMyShop(
+            @RequestHeader("X-Shop-Id") String shopIdStr,
+            @RequestBody ShopDto.ConsolidatedShopUpdateRequest request) {
+        return ResponseEntity.ok(shopService.patchMyShop(UUID.fromString(shopIdStr), request));
+    }
+
     @GetMapping("/settings")
     public ResponseEntity<ShopDto.ShopSettingsResponse> getShopSettings(
             @RequestHeader("X-Shop-Id") String shopIdStr) {

@@ -122,6 +122,36 @@ public class ShopService {
         return mapToResponse(shopRepository.save(shop));
     }
 
+    @Transactional
+    @CacheEvict(value = { "publicShops", "internalShops" }, key = "#result.slug")
+    public ShopDto.ShopResponse patchMyShop(UUID shopId, ShopDto.ConsolidatedShopUpdateRequest request) {
+        Shop shop = shopRepository.findById(shopId)
+                .orElseThrow(() -> new RuntimeException("Shop not found"));
+
+        // Update Shop Basic Info
+        if (request.getName() != null)
+            shop.setName(request.getName());
+        if (request.getPhone() != null)
+            shop.setPhone(request.getPhone());
+        if (request.getEmail() != null)
+            shop.setEmail(request.getEmail());
+
+        Shop savedShop = shopRepository.save(shop);
+
+        // Update Shop Settings
+        ShopSettings settings = shopSettingsRepository.findByShopId(shopId)
+                .orElseThrow(() -> new RuntimeException("Settings not found for shop " + shopId));
+
+        if (request.getAddress() != null)
+            settings.setAddress(request.getAddress());
+        if (request.getInstagramUrl() != null)
+            settings.setInstagramUrl(request.getInstagramUrl());
+
+        shopSettingsRepository.save(settings);
+
+        return mapToResponse(savedShop);
+    }
+
     public ShopDto.ShopSettingsResponse getShopSettings(UUID shopId) {
         ShopSettings settings = shopSettingsRepository.findByShopId(shopId)
                 .orElseThrow(() -> new RuntimeException("Settings not found for shop " + shopId));

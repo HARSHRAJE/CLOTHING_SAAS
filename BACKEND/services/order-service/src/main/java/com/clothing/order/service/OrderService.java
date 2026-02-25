@@ -63,18 +63,24 @@ public class OrderService {
             headers.set("X-Internal-Api-Key", internalApiKey);
             org.springframework.http.HttpEntity<String> entity = new org.springframework.http.HttpEntity<>(headers);
 
-            org.springframework.http.ResponseEntity<Map> response = restTemplate.exchange(
-                    productServiceUrl + "/internal/products/" + itemRequest.getVariantId(),
-                    org.springframework.http.HttpMethod.GET,
-                    entity,
-                    Map.class);
-            Map variantDetails = response.getBody();
+            org.springframework.http.ResponseEntity<com.clothing.order.dto.ProductInternalResponse> response = restTemplate
+                    .exchange(
+                            productServiceUrl + "/internal/products/" + itemRequest.getVariantId(),
+                            org.springframework.http.HttpMethod.GET,
+                            entity,
+                            com.clothing.order.dto.ProductInternalResponse.class);
+            com.clothing.order.dto.ProductInternalResponse variantDetails = response.getBody();
             if (variantDetails == null) {
                 throw new RuntimeException("Variant not found: " + itemRequest.getVariantId());
             }
 
-            Integer availableStock = (Integer) variantDetails.get("availableStock");
-            if (availableStock < itemRequest.getQuantity()) {
+            System.out.println("Processing variant: " + variantDetails.getVariantId() +
+                    ", Name: " + variantDetails.getProductName() +
+                    ", Size: " + variantDetails.getSize() +
+                    ", Color: " + variantDetails.getColor());
+
+            Integer availableStock = variantDetails.getAvailableStock();
+            if (availableStock == null || availableStock < itemRequest.getQuantity()) {
                 throw new RuntimeException("Insufficient stock for variant: " + itemRequest.getVariantId());
             }
 
@@ -93,18 +99,21 @@ public class OrderService {
                     reserveEntity,
                     Void.class);
 
-            BigDecimal price = new BigDecimal(variantDetails.get("price").toString());
+            BigDecimal price = variantDetails.getPrice();
+            if (price == null) {
+                throw new RuntimeException("Price missing for variant: " + itemRequest.getVariantId());
+            }
             BigDecimal itemTotal = price.multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
             totalAmount = totalAmount.add(itemTotal);
 
             OrderItem orderItem = OrderItem.builder()
                     .shopId(shopId)
                     .order(order)
-                    .productId(UUID.fromString((String) variantDetails.get("productId")))
+                    .productId(variantDetails.getProductId())
                     .variantId(itemRequest.getVariantId())
-                    .productName((String) variantDetails.get("productName"))
-                    .size((String) variantDetails.get("size"))
-                    .color((String) variantDetails.get("color"))
+                    .productName(variantDetails.getProductName())
+                    .size(variantDetails.getSize())
+                    .color(variantDetails.getColor())
                     .quantity(itemRequest.getQuantity())
                     .price(price)
                     .totalPrice(itemTotal)
