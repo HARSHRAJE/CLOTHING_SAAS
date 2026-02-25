@@ -10,12 +10,12 @@ import ProductList from '@/product-service/components/ProductList';
 import ProductForm from '@/product-service/components/ProductForm';
 import { Category } from '@/product-service/models/Category';
 import { Product } from '@/product-service/models/Product';
-import { LayoutDashboard, Package, Tags, ShoppingBag, Users } from 'lucide-react';
+import { LayoutDashboard, Package, Tags, ShoppingBag, Users, MessageSquare, BarChart3, Settings } from 'lucide-react';
 import OrderList from '@/order-service/components/OrderList';
 import CustomerList from '@/customer-service/components/CustomerList';
 import { InquiryList } from '@/inquiry-service/components/InquiryList';
-import { MessageSquare, BarChart3 } from 'lucide-react';
 import AnalyticsDashboard from '@/analytics-service/components/AnalyticsDashboard';
+import SettingsForm from './components/SettingsForm';
 
 enum Tab {
     OVERVIEW = 'OVERVIEW',
@@ -24,7 +24,8 @@ enum Tab {
     ORDERS = 'ORDERS',
     CUSTOMERS = 'CUSTOMERS',
     INQUIRIES = 'INQUIRIES',
-    ANALYTICS = 'ANALYTICS'
+    ANALYTICS = 'ANALYTICS',
+    SETTINGS = 'SETTINGS'
 }
 
 export default function OwnerDashboard() {
@@ -150,6 +151,14 @@ export default function OwnerDashboard() {
                             <BarChart3 className="mr-3 h-5 w-5" />
                             Analytics
                         </button>
+                        <button
+                            onClick={() => setActiveTab(Tab.SETTINGS)}
+                            className={`flex items-center px-4 py-2 text-sm font-medium rounded-md w-full text-left ${activeTab === Tab.SETTINGS ? 'bg-indigo-50 text-indigo-700' : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                        >
+                            <Settings className="mr-3 h-5 w-5" />
+                            Settings
+                        </button>
                     </nav>
                 </aside>
 
@@ -240,6 +249,10 @@ export default function OwnerDashboard() {
 
                     {activeTab === Tab.ANALYTICS && (
                         <AnalyticsDashboard />
+                    )}
+
+                    {activeTab === Tab.SETTINGS && (
+                        <SettingsForm />
                     )}
                 </main>
             </div>

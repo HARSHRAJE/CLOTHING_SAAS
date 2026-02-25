@@ -33,6 +33,7 @@ public class ShopSettings {
     private String address;
     private String whatsappNumber;
     private String customDomain;
+    private String instagramUrl;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

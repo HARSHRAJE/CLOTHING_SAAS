@@ -144,6 +144,8 @@ public class ShopService {
             settings.setWhatsappNumber(request.getWhatsappNumber());
         if (request.getCustomDomain() != null)
             settings.setCustomDomain(request.getCustomDomain());
+        if (request.getInstagramUrl() != null)
+            settings.setInstagramUrl(request.getInstagramUrl());
 
         return mapToSettingsResponse(shopSettingsRepository.save(settings));
     }
@@ -164,6 +166,7 @@ public class ShopService {
                 .logoUrl(settings != null ? settings.getLogoUrl() : null)
                 .themeColor(settings != null ? settings.getThemeColor() : null)
                 .whatsappNumber(settings != null ? settings.getWhatsappNumber() : null)
+                .instagramUrl(settings != null ? settings.getInstagramUrl() : null)
                 .build();
     }
 
@@ -201,6 +204,7 @@ public class ShopService {
                 .address(settings.getAddress())
                 .whatsappNumber(settings.getWhatsappNumber())
                 .customDomain(settings.getCustomDomain())
+                .instagramUrl(settings.getInstagramUrl())
                 .build();
     }
 }

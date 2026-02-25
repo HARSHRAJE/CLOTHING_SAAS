@@ -65,6 +65,7 @@ public class ShopDto {
         private String address;
         private String whatsappNumber;
         private String customDomain;
+        private String instagramUrl;
     }
 
     @Data
@@ -76,6 +77,7 @@ public class ShopDto {
         private String address;
         private String whatsappNumber;
         private String customDomain;
+        private String instagramUrl;
     }
 
     @Data
@@ -87,5 +89,6 @@ public class ShopDto {
         private String logoUrl;
         private String themeColor;
         private String whatsappNumber;
+        private String instagramUrl;
     }
 }

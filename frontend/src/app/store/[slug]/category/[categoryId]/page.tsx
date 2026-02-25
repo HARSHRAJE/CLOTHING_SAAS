@@ -1,0 +1,266 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import axios from 'axios';
+import { ChevronDown, ChevronUp, ShoppingBag, Eye, ArrowLeft, Heart, Repeat } from 'lucide-react';
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+
+interface Variant {
+    id: string;
+    productId: string;
+    size: string;
+    color: string;
+    price?: number;
+    stock: number;
+    imageUrls?: string[];
+}
+
+interface Product {
+    id: string;
+    name: string;
+    description?: string;
+    price: number;
+    status: string;
+    variants?: Variant[];
+}
+
+interface Category {
+    id: string;
+    name: string;
+    description: string;
+}
+
+export default function CategoryPage() {
+    const params = useParams();
+    const router = useRouter();
+    const slug = params.slug as string;
+    const categoryId = params.categoryId as string;
+
+    const [category, setCategory] = useState<Category | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+
+    const [isAvailabilityOpen, setIsAvailabilityOpen] = useState(true);
+    const [isPriceOpen, setIsPriceOpen] = useState(true);
+
+    useEffect(() => {
+        fetchCategoryData();
+    }, [slug, categoryId]);
+
+    const fetchCategoryData = async () => {
+        try {
+            setLoading(true);
+
+            // 1. Get Shop ID
+            const shopRes = await axios.get(`${API}/store/${slug}`);
+            const shopId = shopRes.data.id;
+
+            // 2. Get Categories to find the current one's name
+            const catsRes = await axios.get(`${API}/products/categories`, {
+                headers: { 'X-Shop-Id': shopId }
+            });
+            const currentCat = catsRes.data.find((c: Category) => c.id === categoryId);
+            if (currentCat) setCategory(currentCat);
+
+            // 3. Get all products and filter by categoryId
+            const prodRes = await axios.get(`${API}/store/products/${slug}`);
+            const categoryProducts = prodRes.data.filter((p: any) => p.category?.id === categoryId);
+            setProducts(categoryProducts);
+
+        } catch (err) {
+            setError('Failed to load category.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getImageUrl = (url?: string) => {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        if (url.startsWith('/media/')) return `${API}${url}`;
+        return `${API}/media/${url}/view`;
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center">
+                <div className="animate-pulse flex flex-col items-center">
+                    <div className="h-8 w-48 bg-gray-200 rounded mb-4"></div>
+                    <div className="h-4 w-32 bg-gray-200 rounded"></div>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !category) {
+        return (
+            <div className="min-h-screen bg-[#f8f8f8] flex flex-col items-center justify-center">
+                <p className="text-xl font-serif text-gray-500 mb-6">{error || 'Category not found'}</p>
+                <Link href={`/store/${slug}`} className="text-sm font-bold tracking-widest uppercase border border-black px-6 py-3 hover:bg-black hover:text-white transition">
+                    Return to Store
+                </Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-[#f8f8f8] font-sans text-[#1a1a1a]">
+            {/* Minimal Header */}
+            <header className="w-full bg-[#f4f4f4] py-12 px-8 flex items-center justify-center relative border-b border-gray-200/50">
+                <button onClick={() => router.back()} className="absolute left-8 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-200 rounded-full transition">
+                    <ArrowLeft className="w-5 h-5 text-gray-600" />
+                </button>
+                <h1 className="text-5xl font-mono tracking-wide text-[#2b2b2b] uppercase pt-4 pb-2">{category.name}</h1>
+            </header>
+
+            <div className="max-w-[1600px] mx-auto px-8 py-8 flex flex-col lg:flex-row gap-12">
+
+                {/* Sidebar Sidebar Filters */}
+                <aside className="w-full lg:w-64 flex-shrink-0">
+                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-200">
+                        <span className="text-[11px] font-bold tracking-[0.1em] text-gray-800 uppercase">Date, New to Old</span>
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                    </div>
+
+                    <div className="space-y-6">
+                        {/* Availability Filter */}
+                        <div className="border-b border-gray-200 pb-6">
+                            <button
+                                onClick={() => setIsAvailabilityOpen(!isAvailabilityOpen)}
+                                className="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.1em] text-gray-800 uppercase mb-4"
+                            >
+                                Availability
+                                {isAvailabilityOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </button>
+
+                            {isAvailabilityOpen && (
+                                <div className="space-y-3">
+                                    <label className="flex items-center justify-between cursor-pointer group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-5 h-5 border border-gray-300 group-hover:border-gray-500 transition"></div>
+                                            <span className="text-sm text-gray-500">In stock</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400">({products.filter(p => (p.variants?.[0]?.stock || 0) > 0).length})</span>
+                                    </label>
+                                    <label className="flex items-center justify-between cursor-pointer group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-5 h-5 border border-gray-300 group-hover:border-gray-500 transition"></div>
+                                            <span className="text-sm text-gray-500">Out of stock</span>
+                                        </div>
+                                        <span className="text-xs text-gray-400">({products.filter(p => (p.variants?.[0]?.stock || 0) === 0).length})</span>
+                                    </label>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Price Filter */}
+                        <div className="border-b border-gray-200 pb-6">
+                            <button
+                                onClick={() => setIsPriceOpen(!isPriceOpen)}
+                                className="w-full flex items-center justify-between text-[11px] font-bold tracking-[0.1em] text-gray-800 uppercase mb-4"
+                            >
+                                Price
+                                {isPriceOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </button>
+                        </div>
+                    </div>
+                </aside>
+
+                {/* Product Grid */}
+                <div className="flex-1">
+                    {/* Top Bar Navigation */}
+                    <div className="flex justify-between items-center mb-8">
+                        <span className="text-sm text-gray-400 tracking-wide font-medium">{products.length} products</span>
+                        <div className="flex items-center gap-4 text-sm font-bold tracking-widest uppercase">
+                            <span className="text-gray-400 font-normal text-xs tracking-normal">View:</span>
+                            <button className="text-gray-600 hover:text-black transition">2</button>
+                            <button className="text-black border-b border-black">3</button>
+                        </div>
+                    </div>
+
+                    {products.length === 0 ? (
+                        <div className="py-32 text-center text-gray-500 font-serif text-xl border border-dashed border-gray-300">
+                            No products currently available in this category.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-x-6 gap-y-12">
+                            {products.map(product => {
+                                const heroImg = product.variants?.[0]?.imageUrls?.[0];
+                                const hasStock = (product.variants?.[0]?.stock || 0) > 0;
+                                const isLowStock = hasStock && (product.variants?.[0]?.stock || 0) <= 5;
+
+                                return (
+                                    <div key={product.id} className="group relative flex flex-col gap-3">
+                                        {/* Image Container */}
+                                        <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden w-full">
+                                            {heroImg ? (
+                                                <img
+                                                    src={getImageUrl(heroImg)!}
+                                                    alt={product.name}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
+                                                    No Image
+                                                </div>
+                                            )}
+
+                                            {/* Top Left Tags */}
+                                            <div className="absolute top-3 left-3 flex flex-col gap-1.5 z-10 w-fit">
+                                                <span className="bg-[#1a1a1a] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase">New</span>
+                                                <span className="bg-[#dc2626] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase">Sale</span>
+                                                <span className="bg-white text-gray-800 text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase border-r-2 border-r-[#dc2626]">
+                                                    -6{Math.floor(Math.random() * 9) + 1}%
+                                                </span>
+                                                {isLowStock && (
+                                                    <span className="bg-[#facc15] text-white text-[10px] font-bold tracking-widest px-2.5 py-1 uppercase mt-1">
+                                                        Low Stock
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Top Right Action Icons */}
+                                            <div className="absolute top-3 right-3 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                                                <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow hover:bg-black hover:text-white transition-colors text-gray-600">
+                                                    <Heart className="w-4 h-4" />
+                                                </button>
+                                                <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow hover:bg-black hover:text-white transition-colors text-gray-600">
+                                                    <Repeat className="w-4 h-4" />
+                                                </button>
+                                                <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow hover:bg-black hover:text-white transition-colors text-gray-600">
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Product Info */}
+                                        <div className="flex flex-col gap-1.5 px-1">
+                                            <h3 className="text-[14px] font-medium text-gray-800 tracking-wide">{product.name}</h3>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {(product.price * 2.5).toLocaleString()}</span>
+                                                <span className="text-[14px] font-bold text-[#dc2626] font-mono">Rs. {product.price.toLocaleString()}</span>
+                                            </div>
+
+                                            {/* Color Swatches (Mock) */}
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <div className="w-3.5 h-3.5 rounded-full bg-black border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
+                                                <div className="w-3.5 h-3.5 rounded-full bg-white border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
+                                                <div className="w-3.5 h-3.5 rounded-full bg-red-800 border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
+                                                <div className="w-3.5 h-3.5 rounded-full bg-green-700 border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
+                                                <span className="text-[10px] font-bold text-gray-500 ml-1">+ 2</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
