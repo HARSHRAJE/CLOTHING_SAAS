@@ -16,6 +16,7 @@ public class ProductInternalResponse {
     private UUID variantId;
     private UUID productId;
     private String productName;
+    private String category;
     private String size;
     private String color;
     private BigDecimal price;

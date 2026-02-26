@@ -198,7 +198,11 @@ public class ShopService {
                 .slug(shop.getSlug())
                 .logoUrl(settings != null ? settings.getLogoUrl() : null)
                 .themeColor(settings != null ? settings.getThemeColor() : null)
-                .whatsappNumber(settings != null ? settings.getWhatsappNumber() : null)
+                .address(settings != null ? settings.getAddress() : null)
+                .email(shop.getEmail())
+                .whatsappNumber(
+                        (settings != null && settings.getWhatsappNumber() != null) ? settings.getWhatsappNumber()
+                                : shop.getPhone())
                 .instagramUrl(settings != null ? settings.getInstagramUrl() : null)
                 .build();
     }

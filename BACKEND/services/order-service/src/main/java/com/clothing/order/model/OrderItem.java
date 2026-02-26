@@ -37,6 +37,7 @@ public class OrderItem {
     private UUID variantId;
 
     private String productName;
+    private String category;
     private String size;
     private String color;
 

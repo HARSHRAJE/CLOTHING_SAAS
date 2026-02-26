@@ -182,7 +182,14 @@ const OrderList = () => {
                                                     {order.items?.map(item => (
                                                         <div key={item.id} className="bg-white p-3 rounded-lg border border-gray-100 flex justify-between items-center shadow-sm">
                                                             <div className="flex-1 min-w-0 pr-3">
-                                                                <div className="font-bold text-gray-900 text-xs truncate uppercase tracking-tight">{item.productName}</div>
+                                                                <div className="font-bold text-gray-900 text-xs truncate uppercase tracking-tight">
+                                                                    {item.productName}
+                                                                </div>
+                                                                {item.category && (
+                                                                    <div className="text-[9px] font-black text-indigo-500 uppercase tracking-wider mt-0.5">
+                                                                        {item.category}
+                                                                    </div>
+                                                                )}
                                                                 <div className="flex items-center gap-2 mt-1">
                                                                     <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-bold">SIZE: {item.size || 'N/A'}</span>
                                                                     <span className="text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded font-bold uppercase">COLOR: {item.color || 'N/A'}</span>
@@ -196,9 +203,12 @@ const OrderList = () => {
                                                     ))}
                                                 </div>
                                                 {order.address && (
-                                                    <div className="mt-4 p-3 bg-white rounded-lg border border-dashed border-gray-200">
-                                                        <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Shipping Address</div>
-                                                        <div className="text-xs text-gray-700 leading-relaxed font-medium">{order.address}</div>
+                                                    <div className="mt-4 p-4 bg-indigo-50 rounded-lg border border-dashed border-indigo-200">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <Truck size={14} className="text-indigo-600" />
+                                                            <div className="text-[11px] font-black text-indigo-800 uppercase tracking-widest">Customer Delivery Details</div>
+                                                        </div>
+                                                        <div className="text-sm text-gray-800 leading-relaxed font-semibold">{order.address}</div>
                                                     </div>
                                                 )}
                                             </div>

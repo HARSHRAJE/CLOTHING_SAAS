@@ -23,6 +23,7 @@ export interface OrderItem {
     productId: string;
     variantId: string;
     productName: string;
+    category?: string;
     size: string;
     color: string;
     quantity: number;

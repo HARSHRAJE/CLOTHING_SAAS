@@ -35,6 +35,7 @@ public class InternalProductController {
                 .variantId(variant.getId())
                 .productId(product.getId())
                 .productName(product.getName())
+                .category(product.getCategory() != null ? product.getCategory().getName() : "Uncategorized")
                 .size(variant.getSize())
                 .color(variant.getColor())
                 .price(variant.getPrice() != null ? variant.getPrice() : product.getPrice())
@@ -62,6 +63,7 @@ public class InternalProductController {
         private UUID variantId;
         private UUID productId;
         private String productName;
+        private String category;
         private String size;
         private String color;
         private BigDecimal price;

@@ -64,6 +64,7 @@ public class OrderDto {
         private UUID productId;
         private UUID variantId;
         private String productName;
+        private String category;
         private String size;
         private String color;
         private Integer quantity;

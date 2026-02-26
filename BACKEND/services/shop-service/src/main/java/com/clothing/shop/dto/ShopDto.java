@@ -99,6 +99,8 @@ public class ShopDto {
         private String slug;
         private String logoUrl;
         private String themeColor;
+        private String address;
+        private String email;
         private String whatsappNumber;
         private String instagramUrl;
     }
