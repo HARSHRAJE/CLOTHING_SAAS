@@ -130,6 +130,9 @@ export default function ProductPage() {
             });
             setOrderSuccess(true);
             setCart([]);
+            setOrderForm({ customerName: '', phone: '', email: '' });
+            setShowOrder(false);
+            setShowCart(false);
         } catch {
             alert('Failed to place order. Please try again.');
         } finally {
@@ -233,6 +236,27 @@ export default function ProductPage() {
         );
     }
 
+    // --- ORDER SUCCESS ---
+    if (orderSuccess) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
+                <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <ShoppingBag className="w-10 h-10 text-emerald-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Placed!</h2>
+                    <p className="text-gray-600 mb-6">Thank you for your order. We&apos;ll get back to you soon.</p>
+                    <button
+                        onClick={() => { setOrderSuccess(false); setShowOrder(false); setShowCart(false); }}
+                        className="bg-[#1a1a1a] text-white px-6 py-3 rounded-xl font-medium tracking-widest uppercase text-sm hover:bg-black transition-colors"
+                    >
+                        Continue Shopping
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     // --- CHECKOUT FORM ---
     if (showOrder) {
         return (
@@ -289,27 +313,6 @@ export default function ProductPage() {
                         className="w-full bg-[#1a1a1a] text-white py-4 rounded-xl font-semibold text-lg hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                         <Send className="w-5 h-5" />
                         {submitting ? 'Placing Order...' : 'Place Order'}
-                    </button>
-                </div>
-            </div>
-        );
-    }
-
-    // --- ORDER SUCCESS ---
-    if (orderSuccess) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
-                    <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <ShoppingBag className="w-10 h-10 text-emerald-600" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Order Placed!</h2>
-                    <p className="text-gray-600 mb-6">Thank you for your order. We&apos;ll get back to you soon.</p>
-                    <button
-                        onClick={() => { setOrderSuccess(false); setShowOrder(false); setShowCart(false); }}
-                        className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-emerald-700 transition-colors"
-                    >
-                        Continue Shopping
                     </button>
                 </div>
             </div>
