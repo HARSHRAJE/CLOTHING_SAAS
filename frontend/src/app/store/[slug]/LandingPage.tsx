@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import { ShoppingBag, ArrowLeft, Plus, Minus, Trash2, Send, Store, Package, Search, X, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Plus, Minus, Trash2, Send, Store, Package, X, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -505,13 +505,6 @@ export default function LandingPage() {
                 </div>
 
                 <div className="flex items-center gap-6 text-gray-900">
-                    <div className="relative group">
-                        <Search className="w-5 h-5 cursor-pointer hover:text-gray-600 transition-colors" />
-                        <div className="absolute right-0 top-full mt-4 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                            <input type="text" placeholder="Search products..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                                className="w-full bg-white border border-gray-200 rounded-none px-4 py-3 shadow-lg focus:ring-1 focus:ring-black focus:border-black outline-none text-sm font-medium" />
-                        </div>
-                    </div>
                     <button onClick={() => setShowCart(true)} className="relative hover:text-gray-600 transition-colors">
                         <ShoppingBag className="w-5 h-5" />
                         {cartCount > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-black text-white text-[10px] rounded-full flex items-center justify-center font-bold">{cartCount}</span>}
