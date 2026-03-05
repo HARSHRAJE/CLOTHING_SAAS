@@ -13,9 +13,10 @@ export default function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        // Automatically logout if the user arrives at the login page (e.g. via back button)
-        // We run this ONLY on mount to prevent logging the user out immediately after a successful login.
-        logout();
+        // Clear local user state when landing on login page (e.g. via back button)
+        // Do NOT call logout() here as it would clear the HttpOnly cookie,
+        // causing a redirect loop if the user was sent here by expired-session.
+        localStorage.removeItem('user');
         // eslint-disable-next-line react-hooks/exhaustive-deps.
     }, []);
 
