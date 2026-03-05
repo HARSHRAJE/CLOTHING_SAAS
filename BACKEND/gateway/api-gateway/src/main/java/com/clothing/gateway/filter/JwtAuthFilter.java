@@ -46,8 +46,14 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         ServerHttpRequest.Builder requestBuilder = exchange.getRequest().mutate()
                 .header("X-Internal-Api-Key", internalApiKey);
 
-        // Skip JWT authentication for open paths but STILL pass the internal API key
+        // For open paths, skip mandatory JWT auth but still forward the token if present
+        // This is needed for endpoints like /auth/me which are open at the gateway level
+        // but require auth at the downstream service level
         if (isOpenPath(path) || path.matches("/media/.+/view")) {
+            HttpCookie openPathCookie = exchange.getRequest().getCookies().getFirst("accessToken");
+            if (openPathCookie != null) {
+                requestBuilder.header(HttpHeaders.AUTHORIZATION, "Bearer " + openPathCookie.getValue());
+            }
             return chain.filter(exchange.mutate().request(requestBuilder.build()).build());
         }
 
