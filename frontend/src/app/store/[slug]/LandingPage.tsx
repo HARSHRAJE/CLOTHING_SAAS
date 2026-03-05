@@ -548,9 +548,29 @@ export default function LandingPage() {
                         <h2 className="text-6xl md:text-[7rem] font-serif italic text-[#cba258] leading-[1] mb-12 tracking-tight drop-shadow-xl">
                             Wardrobe
                         </h2>
-                        <Link href={`/store/${slug}/collections`} className="inline-block bg-white text-black text-[12px] font-bold tracking-[0.2em] uppercase px-12 py-5 hover:bg-black hover:text-white transition-all duration-500 shadow-xl hover:shadow-2xl hover:-translate-y-1">
-                            Shop The Collection
-                        </Link>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <button
+                                onClick={() => {
+                                    setSelectedGender('MEN');
+                                    document.getElementById('curations')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="inline-block bg-transparent border border-white text-white text-[12px] font-bold tracking-[0.2em] uppercase px-8 py-5 hover:bg-white hover:text-black transition-all duration-500 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                            >
+                                Mens
+                            </button>
+                            <Link href={`/store/${slug}/collections`} className="inline-block bg-white text-black text-[12px] font-bold tracking-[0.2em] uppercase px-12 py-5 hover:bg-black hover:text-white transition-all duration-500 shadow-xl hover:shadow-2xl hover:-translate-y-1">
+                                Shop The Collection
+                            </Link>
+                            <button
+                                onClick={() => {
+                                    setSelectedGender('WOMEN');
+                                    document.getElementById('curations')?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="inline-block bg-transparent border border-white text-white text-[12px] font-bold tracking-[0.2em] uppercase px-8 py-5 hover:bg-white hover:text-black transition-all duration-500 shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                            >
+                                Womens
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -574,7 +594,7 @@ export default function LandingPage() {
             </div>
 
             {/* Content Highlighted Categories */}
-            <div className="max-w-7xl mx-auto px-8 pb-32">
+            <div id="curations" className="max-w-7xl mx-auto px-8 pb-32">
                 {/* Section Header */}
                 <div className="flex flex-col items-center justify-center text-center mb-16">
                     <p className="text-[11px] font-bold tracking-[0.3em] text-[#cba258] uppercase mb-4">Discover</p>
