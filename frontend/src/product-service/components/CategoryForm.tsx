@@ -18,7 +18,12 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
         if (category) {
             reset({
                 name: category.name,
-                description: category.description
+                description: category.description,
+                targetGender: category.targetGender
+            });
+        } else {
+            reset({
+                targetGender: 'UNISEX'
             });
         }
     }, [category, reset]);
@@ -56,6 +61,18 @@ export default function CategoryForm({ category, onSuccess, onCancel }: Category
                     rows={3}
                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
                 />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-700">Target Gender</label>
+                <select
+                    {...register('targetGender', { required: 'Target Gender is required' })}
+                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2 bg-white"
+                >
+                    <option value="MEN">Men</option>
+                    <option value="WOMEN">Women</option>
+                    <option value="UNISEX">Unisex</option>
+                </select>
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.http.HttpCookie;
 import reactor.core.publisher.Mono;
 
 import java.security.Key;
@@ -55,15 +56,26 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        // Extract Authorization header
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        // Extract token from Cookies or Authorization header
+        String token = null;
+        HttpCookie cookie = exchange.getRequest().getCookies().getFirst("accessToken");
+        if (cookie != null) {
+            token = cookie.getValue();
+        }
+        
+        if (token == null) {
+            String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                token = authHeader.substring(7);
+            }
+        }
+
+        if (token == null) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
 
         try {
-            String token = authHeader.substring(7);
             Claims claims = extractAllClaims(token);
 
             // Enrich the request with user info headers for downstream services

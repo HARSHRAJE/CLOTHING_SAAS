@@ -4,14 +4,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 const mediaApi = axios.create({
     baseURL: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/media`,
-});
-
-mediaApi.interceptors.request.use((config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+    withCredentials: true,
 });
 
 export interface Media {

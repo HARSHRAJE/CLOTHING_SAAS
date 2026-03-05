@@ -2,6 +2,7 @@ package com.clothing.product.dto;
 
 import com.clothing.product.model.InventoryTransactionType;
 import com.clothing.product.model.ProductStatus;
+import com.clothing.product.model.TargetGender;
 import lombok.Builder;
 import lombok.Data;
 
@@ -17,6 +18,7 @@ public class ProductDto {
     public static class CreateCategoryRequest {
         private String name;
         private String description;
+        private TargetGender targetGender;
     }
 
     @Data
@@ -26,6 +28,7 @@ public class ProductDto {
         private UUID shopId;
         private String name;
         private String description;
+        private TargetGender targetGender;
         private LocalDateTime createdAt;
     }
 

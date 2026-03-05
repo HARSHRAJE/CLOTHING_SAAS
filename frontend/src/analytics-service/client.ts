@@ -8,16 +8,11 @@ const apiClient = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
+    withCredentials: true,
 });
 
-// Add interceptor for JWT if needed (assuming stored in localStorage)
-// Add interceptor for JWT and Shop ID
+// Add interceptor for Shop ID (token is now sent via HttpOnly cookie)
 apiClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
     const userStr = localStorage.getItem("user");
     if (userStr) {
         try {

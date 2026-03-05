@@ -30,6 +30,10 @@ public class Category implements Serializable {
     @Column(columnDefinition = "TEXT")
     private String description;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TargetGender targetGender;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

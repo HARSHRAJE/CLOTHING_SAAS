@@ -8,16 +8,12 @@ export const inquiryApi = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true,
 });
 
 inquiryApi.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-
-        // Add Shop ID specific for Owner operations
+        // Add Shop ID from localStorage user for Owner operations
         const userStr = localStorage.getItem('user');
         if (userStr) {
             try {
@@ -27,24 +23,6 @@ inquiryApi.interceptors.request.use(
                 }
             } catch (e) {
                 console.error("Failed to parse user from localStorage", e);
-            }
-        }
-
-        // Fallback: Decode Token if Shop ID missing
-        if (!config.headers['X-Shop-Id'] && token) {
-            try {
-                const base64Url = token.split('.')[1];
-                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-                const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
-                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-                }).join(''));
-
-                const jwt = JSON.parse(jsonPayload);
-                if (jwt.shopId) {
-                    config.headers['X-Shop-Id'] = jwt.shopId;
-                }
-            } catch (e) {
-                console.error("Failed to decode token for shopId", e);
             }
         }
 

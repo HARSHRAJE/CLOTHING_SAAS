@@ -12,6 +12,10 @@ export const AuthService = {
     return response.data;
   },
 
+  logout: async (): Promise<void> => {
+    await api.post('/auth/logout');
+  },
+
   createUser: async (data: any): Promise<User> => {
     const response = await api.post<User>('/auth/admin/users', data);
     return response.data;

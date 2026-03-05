@@ -13,18 +13,7 @@ export const notificationClient = axios.create({
     headers: {
         "Content-Type": "application/json",
     },
-});
-
-notificationClient.interceptors.request.use((config) => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    // Some services require X-Shop-Id, but Notification Service extracts it from JWT for Owner APIs
-    // We can add it just in case if needed later, but our Controller uses JWT.
-
-    return config;
+    withCredentials: true,
 });
 
 export const sendWhatsAppNotification = async (recipient: string, message: string) => {

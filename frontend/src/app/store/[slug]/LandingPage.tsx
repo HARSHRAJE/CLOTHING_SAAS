@@ -22,6 +22,7 @@ interface Category {
     shopId: string;
     name: string;
     description: string;
+    targetGender: 'MEN' | 'WOMEN' | 'UNISEX';
 }
 
 interface Product {
@@ -57,6 +58,7 @@ export default function LandingPage() {
     const [showCart, setShowCart] = useState(false);
     const [showOrder, setShowOrder] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedGender, setSelectedGender] = useState<'ALL' | 'MEN' | 'WOMEN' | 'UNISEX'>('ALL');
     const [orderForm, setOrderForm] = useState({ customerName: '', phone: '', email: '' });
     const [orderSuccess, setOrderSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
@@ -165,10 +167,12 @@ export default function LandingPage() {
         }
     };
 
-    const filteredCategories = categories.filter(c =>
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    const filteredCategories = categories.filter(c => {
+        const matchesSearch = c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesGender = selectedGender === 'ALL' || c.targetGender === selectedGender;
+        return matchesSearch && matchesGender;
+    });
 
     const getImageUrl = (url?: string) => {
         if (!url) return null;
@@ -561,7 +565,23 @@ export default function LandingPage() {
                 <div className="flex flex-col items-center justify-center text-center mb-16">
                     <p className="text-[11px] font-bold tracking-[0.3em] text-[#cba258] uppercase mb-4">Discover</p>
                     <h2 className="text-5xl md:text-6xl font-serif text-[#1a1a1a] tracking-tight">Our Curations</h2>
-                    <div className="w-12 h-0.5 bg-black mt-8"></div>
+                    <div className="w-12 h-0.5 bg-black mt-8 mb-8"></div>
+
+                    {/* Gender Filter */}
+                    <div className="flex flex-wrap justify-center gap-4 mt-4">
+                        {['ALL', 'MEN', 'WOMEN', 'UNISEX'].map((gender) => (
+                            <button
+                                key={gender}
+                                onClick={() => setSelectedGender(gender as any)}
+                                className={`px-6 py-2 text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 ${selectedGender === gender
+                                        ? 'bg-black text-white'
+                                        : 'bg-transparent text-gray-500 hover:text-black border border-transparent hover:border-gray-300'
+                                    }`}
+                            >
+                                {gender}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {loading ? (

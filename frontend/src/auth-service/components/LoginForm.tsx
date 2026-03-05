@@ -23,7 +23,7 @@ export default function LoginForm() {
         setIsLoading(true);
         try {
             const response = await AuthService.login({ email: data.email, password: data.password });
-            login(response.accessToken, {
+            login({
                 userId: response.userId,
                 email: data.email,
                 role: response.role,

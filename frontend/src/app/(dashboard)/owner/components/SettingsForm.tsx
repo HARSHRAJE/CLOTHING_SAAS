@@ -27,14 +27,13 @@ export default function SettingsForm() {
     const fetchShopDetails = async () => {
         try {
             setLoading(true);
-            const token = localStorage.getItem('accessToken');
             // Fetch basic shop info
             const basicRes = await axios.get(`${API}/shops/me`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
             // Fetch shop settings
             const settingsRes = await axios.get(`${API}/shops/me/settings`, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
 
             setShopDetails({
@@ -58,7 +57,6 @@ export default function SettingsForm() {
 
         try {
             setSaving(true);
-            const token = localStorage.getItem('accessToken');
 
             // Consolidated PATCH request to update everything in one go
             await axios.patch(`${API}/shops/me`, {
@@ -68,7 +66,7 @@ export default function SettingsForm() {
                 address: shopDetails.address,
                 instagramUrl: shopDetails.instagramUrl
             }, {
-                headers: { Authorization: `Bearer ${token}` }
+                withCredentials: true
             });
 
             setMessage({ type: 'success', text: 'Shop contact details updated successfully.' });

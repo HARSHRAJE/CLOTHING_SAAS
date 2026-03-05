@@ -23,6 +23,8 @@ public class CategoryService {
                 .shopId(shopId)
                 .name(request.getName())
                 .description(request.getDescription())
+                .targetGender(request.getTargetGender() == null ? com.clothing.product.model.TargetGender.UNISEX
+                        : request.getTargetGender())
                 .build();
 
         Category saved = categoryRepository.save(category);
@@ -48,6 +50,9 @@ public class CategoryService {
 
         category.setName(request.getName());
         category.setDescription(request.getDescription());
+        if (request.getTargetGender() != null) {
+            category.setTargetGender(request.getTargetGender());
+        }
 
         Category saved = categoryRepository.save(category);
         return mapToResponse(saved);
@@ -71,6 +76,7 @@ public class CategoryService {
                 .shopId(category.getShopId())
                 .name(category.getName())
                 .description(category.getDescription())
+                .targetGender(category.getTargetGender())
                 .createdAt(category.getCreatedAt())
                 .build();
     }
