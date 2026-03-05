@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import axios from 'axios';
-import { ShoppingBag, ArrowLeft, Plus, Minus, Trash2, Send, Store, Package, X, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, Plus, Minus, Trash2, Send, Store, Package, X, ChevronLeft, ChevronRight, Instagram, Phone, MessageCircle } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
@@ -69,6 +69,7 @@ export default function LandingPage() {
         name: '',
         address: '',
         phone: '',
+        whatsappNumber: '',
         email: '',
         instagramUrl: ''
     });
@@ -82,7 +83,8 @@ export default function LandingPage() {
             setShopDetails({
                 name: shopRes.data.name || slug,
                 address: shopRes.data.address || '',
-                phone: shopRes.data.whatsappNumber || '', // PublicShopResponse uses whatsappNumber for phone fallback in public! Wait, Landing page should use public response.
+                phone: shopRes.data.phone || '',
+                whatsappNumber: shopRes.data.whatsappNumber || '',
                 email: shopRes.data.email || '',
                 instagramUrl: shopRes.data.instagramUrl || ''
             });
@@ -499,10 +501,22 @@ export default function LandingPage() {
 
             {/* Header */}
             <header className="absolute top-[40px] w-full z-50 bg-transparent py-6 px-8 flex items-center justify-between">
-                <div className="flex items-center">
-                    <a href={shopDetails.instagramUrl || '#'} target={shopDetails.instagramUrl ? "_blank" : undefined} rel={shopDetails.instagramUrl ? "noopener noreferrer" : undefined} className="text-gray-900 hover:text-gray-600 transition-colors">
-                        <Instagram className="w-5 h-5" />
-                    </a>
+                <div className="flex items-center gap-4">
+                    {shopDetails.instagramUrl && (
+                        <a href={shopDetails.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-gray-600 transition-colors" title="Instagram">
+                            <Instagram className="w-5 h-5" />
+                        </a>
+                    )}
+                    {shopDetails.phone && (
+                        <a href={`tel:${shopDetails.phone}`} className="text-gray-900 hover:text-gray-600 transition-colors" title="Call Us">
+                            <Phone className="w-5 h-5" />
+                        </a>
+                    )}
+                    {shopDetails.whatsappNumber && (
+                        <a href={`https://wa.me/${shopDetails.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-[#25D366] transition-colors" title="WhatsApp">
+                            <MessageCircle className="w-5 h-5" />
+                        </a>
+                    )}
                 </div>
                 <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap hidden sm:flex">
                     <h1 className="text-3xl font-serif text-black uppercase tracking-widest">{slug}</h1>
@@ -574,8 +588,8 @@ export default function LandingPage() {
                                 key={gender}
                                 onClick={() => setSelectedGender(gender as any)}
                                 className={`px-6 py-2 text-xs font-bold tracking-[0.2em] uppercase transition-all duration-300 ${selectedGender === gender
-                                        ? 'bg-black text-white'
-                                        : 'bg-transparent text-gray-500 hover:text-black border border-transparent hover:border-gray-300'
+                                    ? 'bg-black text-white'
+                                    : 'bg-transparent text-gray-500 hover:text-black border border-transparent hover:border-gray-300'
                                     }`}
                             >
                                 {gender}
@@ -719,9 +733,21 @@ export default function LandingPage() {
                     <div className="border-t border-[#333] pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs font-mono text-gray-500">
                         {/* Social Links */}
                         <div className="flex gap-4">
-                            <a href={shopDetails.instagramUrl || '#'} target={shopDetails.instagramUrl ? "_blank" : undefined} rel={shopDetails.instagramUrl ? "noopener noreferrer" : undefined} className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#cba258] transition-colors text-[#1a1a1a] hover:text-white">
-                                <Instagram className="w-4 h-4" />
-                            </a>
+                            {shopDetails.instagramUrl && (
+                                <a href={shopDetails.instagramUrl} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#1a1a1a] transition-colors text-[#1a1a1a] hover:text-white" title="Instagram">
+                                    <Instagram className="w-4 h-4" />
+                                </a>
+                            )}
+                            {shopDetails.phone && (
+                                <a href={`tel:${shopDetails.phone}`} className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#1a1a1a] transition-colors text-[#1a1a1a] hover:text-white" title="Call Us">
+                                    <Phone className="w-4 h-4" />
+                                </a>
+                            )}
+                            {shopDetails.whatsappNumber && (
+                                <a href={`https://wa.me/${shopDetails.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-white flex items-center justify-center hover:bg-[#25D366] transition-colors text-[#1a1a1a] hover:text-white" title="WhatsApp">
+                                    <MessageCircle className="w-4 h-4" />
+                                </a>
+                            )}
                         </div>
                         <p>&copy; {new Date().getFullYear()}, {slug} - All rights reserved.</p>
                     </div>

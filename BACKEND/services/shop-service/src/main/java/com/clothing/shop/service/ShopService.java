@@ -200,6 +200,7 @@ public class ShopService {
                 .themeColor(settings != null ? settings.getThemeColor() : null)
                 .address(settings != null ? settings.getAddress() : null)
                 .email(shop.getEmail())
+                .phone(shop.getPhone())
                 .whatsappNumber(
                         (settings != null && settings.getWhatsappNumber() != null) ? settings.getWhatsappNumber()
                                 : shop.getPhone())
