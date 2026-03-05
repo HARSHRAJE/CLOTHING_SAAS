@@ -31,7 +31,7 @@ public class Category implements Serializable {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private TargetGender targetGender;
 
     @CreationTimestamp
