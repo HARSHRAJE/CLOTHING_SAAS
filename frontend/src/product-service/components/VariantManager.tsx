@@ -211,7 +211,7 @@ export function VariantManager({ product, onClose }: VariantManagerProps) {
                                 <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{variant.size}</td>
                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{variant.color}</td>
                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
-                                    {variant.price ? `$${variant.price}` : <span className="text-gray-400">Default</span>}
+                                    {variant.price ? `₹${variant.price}` : <span className="text-gray-400">Default</span>}
                                 </td>
                                 <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{variant.stock}</td>
                                 <td className="px-4 py-2 whitespace-nowrap text-right text-sm font-medium">

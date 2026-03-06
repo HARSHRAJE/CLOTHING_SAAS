@@ -14,17 +14,24 @@ import {
     BarChart,
     Bar,
 } from "recharts";
-import { Loader2, TrendingUp, Users, ShoppingBag, DollarSign } from "lucide-react";
+import { Loader2, TrendingUp, Users, ShoppingBag, IndianRupee } from "lucide-react";
+import { ProductService } from "@/product-service/services/ProductService";
+import { Product } from "@/product-service/models/Product";
 
 export default function AnalyticsDashboard() {
     const [data, setData] = useState<DashboardSummary | null>(null);
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getOwnerDashboardSummary();
-                setData(result);
+                const [summaryResult, productsResult] = await Promise.all([
+                    getOwnerDashboardSummary(),
+                    ProductService.getProducts(0, 1000)
+                ]);
+                setData(summaryResult);
+                setProducts(productsResult.content);
             } catch (error) {
                 console.error("Failed to fetch analytics data:", error);
             } finally {
@@ -57,8 +64,8 @@ export default function AnalyticsDashboard() {
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                 <StatsCard
                     title="Total Revenue"
-                    value={`$${data.totalRevenue.toFixed(2)}`}
-                    icon={<DollarSign className="h-5 w-5 text-white" />}
+                    value={`₹${data.totalRevenue.toFixed(2)}`}
+                    icon={<IndianRupee className="h-5 w-5 text-white" />}
                     color="bg-green-500"
                 />
                 <StatsCard
@@ -75,7 +82,7 @@ export default function AnalyticsDashboard() {
                 />
                 <StatsCard
                     title="Avg. Order Value"
-                    value={`$${(data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0).toFixed(2)}`}
+                    value={`₹${(data.totalOrders > 0 ? data.totalRevenue / data.totalOrders : 0).toFixed(2)}`}
                     icon={<TrendingUp className="h-5 w-5 text-white" />}
                     color="bg-orange-500"
                 />
@@ -100,7 +107,7 @@ export default function AnalyticsDashboard() {
                                     stroke="#9CA3AF"
                                     tickLine={false}
                                     axisLine={false}
-                                    tickFormatter={(val) => `$${val}`}
+                                    tickFormatter={(val) => `₹${val}`}
                                 />
                                 <Tooltip
                                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
@@ -156,22 +163,29 @@ export default function AnalyticsDashboard() {
                     <table className="w-full text-left text-gray-600">
                         <thead className="bg-gray-50 text-xs uppercase font-medium text-gray-500">
                             <tr>
-                                <th className="px-6 py-3">Product Name</th>
+                                <th className="px-6 py-3">Product</th>
+                                <th className="px-6 py-3">Category</th>
                                 <th className="px-6 py-3 text-right">Units Sold</th>
                                 <th className="px-6 py-3 text-right">Revenue Generated</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {data.topProducts.map((product) => (
-                                <tr key={product.productId} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] sm:max-w-xs">{product.productName}</td>
-                                    <td className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">{product.unitsSold}</td>
-                                    <td className="px-6 py-4 text-right text-green-600 font-medium">${product.revenue.toFixed(2)}</td>
-                                </tr>
-                            ))}
+                            {data.topProducts.map((metric) => {
+                                const prod = products.find(p => p.id === metric.productId);
+                                const displayName = prod?.name || metric.productName;
+                                const categoryName = prod?.category?.name || 'Unknown';
+                                return (
+                                    <tr key={metric.productId} className="hover:bg-gray-50 transition-colors">
+                                        <td className="px-4 sm:px-6 py-4 font-medium text-gray-900 whitespace-nowrap overflow-hidden text-ellipsis max-w-[150px] sm:max-w-xs">{displayName}</td>
+                                        <td className="px-4 sm:px-6 py-4 text-gray-500 whitespace-nowrap">{categoryName}</td>
+                                        <td className="px-4 sm:px-6 py-4 text-right whitespace-nowrap">{metric.unitsSold}</td>
+                                        <td className="px-6 py-4 text-right text-green-600 font-medium">₹{metric.revenue.toFixed(2)}</td>
+                                    </tr>
+                                )
+                            })}
                             {data.topProducts.length === 0 && (
                                 <tr>
-                                    <td colSpan={3} className="px-6 py-8 text-center text-gray-400">No top products data available yet.</td>
+                                    <td colSpan={4} className="px-6 py-8 text-center text-gray-400">No top products data available yet.</td>
                                 </tr>
                             )}
                         </tbody>
