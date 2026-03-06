@@ -519,7 +519,7 @@ export default function LandingPage() {
                     )}
                 </div>
                 <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap hidden sm:flex">
-                    <h1 className="text-3xl font-serif text-black uppercase tracking-widest">{slug}</h1>
+                    <h1 className="text-3xl font-serif text-black uppercase tracking-widest">{shopDetails.name || slug}</h1>
                 </div>
 
                 <div className="flex items-center gap-6 text-gray-900">
@@ -709,7 +709,7 @@ export default function LandingPage() {
                         {/* Brand Column */}
                         <div className="md:col-span-4 flex flex-col items-start pr-8 text-left">
                             <h2 className="text-4xl font-serif text-white tracking-widest uppercase mb-6 drop-shadow-md">
-                                {slug}
+                                {shopDetails.name || slug}
                             </h2>
                             <p className="text-sm text-gray-500 leading-relaxed mb-6">
                                 Crafting timeless pieces for the modern wardrobe. Quality, minimalism, and intent in every stitch. Discover the art of restraint.
@@ -769,7 +769,7 @@ export default function LandingPage() {
                                 </a>
                             )}
                         </div>
-                        <p>&copy; {new Date().getFullYear()}, {slug} - All rights reserved.</p>
+                        <p>&copy; {new Date().getFullYear()}, {shopDetails.name || slug} - All rights reserved.</p>
                     </div>
                 </div>
             </footer>
