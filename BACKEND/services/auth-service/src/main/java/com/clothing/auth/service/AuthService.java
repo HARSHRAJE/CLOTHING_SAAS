@@ -16,6 +16,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import org.springframework.beans.factory.annotation.Value;
+import com.clothing.auth.model.PasswordResetToken;
+import com.clothing.auth.repository.PasswordResetTokenRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,11 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
+    private final EmailService emailService;
+    private final PasswordResetTokenRepository tokenRepository;
+
+    @Value("${frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     public AuthDto.LoginResponse login(AuthDto.LoginRequest request) {
         authenticationManager.authenticate(
@@ -136,6 +145,47 @@ public class AuthService {
                 .shopId(user.getShopId())
                 .build();
 
+    }
+
+    public void forgotPassword(String email) {
+        User user = userRepository.findByEmail(email).orElse(null);
+        if (user == null || user.getStatus() == Status.DISABLED) {
+            // Silently return to prevent user enumeration
+            return;
+        }
+
+        String tokenString = UUID.randomUUID().toString();
+        PasswordResetToken token = PasswordResetToken.builder()
+                .token(tokenString)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusMinutes(15))
+                .build();
+
+        tokenRepository.save(token);
+
+        String resetLink = String.format("%s/reset-password?token=%s", frontendUrl, tokenString);
+        emailService.sendPasswordResetEmail(user.getEmail(), resetLink);
+    }
+
+    public void resetPassword(String tokenString, String newPassword) {
+        if (newPassword == null || newPassword.length() < 6) {
+            throw new RuntimeException("Password must be at least 6 characters long");
+        }
+
+        PasswordResetToken token = tokenRepository.findByToken(tokenString)
+                .orElseThrow(() -> new RuntimeException("Invalid or empty password reset token"));
+
+        if (token.getExpiryDate().isBefore(LocalDateTime.now())) {
+            tokenRepository.delete(token);
+            throw new RuntimeException("Password reset token has expired");
+        }
+
+        User user = token.getUser();
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        // Invalidate token after successful reset
+        tokenRepository.delete(token);
     }
 
     private User getUserByEmail(String email) {

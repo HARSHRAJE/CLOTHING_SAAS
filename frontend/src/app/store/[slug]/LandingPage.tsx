@@ -518,7 +518,7 @@ export default function LandingPage() {
                         </a>
                     )}
                 </div>
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap hidden sm:flex">
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap">
                     <h1 className="text-3xl font-serif text-black uppercase tracking-widest">{shopDetails.name || slug}</h1>
                 </div>
 

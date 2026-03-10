@@ -62,6 +62,18 @@ public class AuthController {
         return ResponseEntity.ok(authService.getCurrentUser(userDetails.getUsername()));
     }
 
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@RequestBody AuthDto.ForgotPasswordRequest request) {
+        authService.forgotPassword(request.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@RequestBody AuthDto.ResetPasswordRequest request) {
+        authService.resetPassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/admin/users")
     public ResponseEntity<AuthDto.UserResponse> createOwner(@RequestBody AuthDto.CreateUserRequest request) {
         // Enforce SUPER_ADMIN check if not handled by security config fully or for

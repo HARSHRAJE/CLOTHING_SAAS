@@ -7,6 +7,8 @@ steps:
       - '${_GAR_URL}/${_SERVICE_NAME}:${COMMIT_SHA}'
       - '--build-arg'
       - 'NEXT_PUBLIC_API_URL=${_API_URL}'
+      - '--build-arg'
+      - 'BACKEND_API_URL=${_BACKEND_API_URL}'
       - '.'
     dir: 'frontend'
 
@@ -30,12 +32,15 @@ steps:
       - '--allow-unauthenticated'
       - '--port'
       - '3000'
+      - '--set-env-vars'
+      - 'BACKEND_API_URL=${_BACKEND_API_URL}'
 
 substitutions:
   _GAR_URL: 'asia-south1-docker.pkg.dev/project-487b1c28-a9ba-47d0-850/cloud-run-source-deploy'
   _SERVICE_NAME: 'frontend'
   _REGION: 'asia-south1'
-  _API_URL: 'https://api-gateway-507952736973.asia-south1.run.app'
+  _API_URL: '/api'
+  _BACKEND_API_URL: 'https://api-gateway-507952736973.asia-south1.run.app'
 
 options:
   logging: CLOUD_LOGGING_ONLY
