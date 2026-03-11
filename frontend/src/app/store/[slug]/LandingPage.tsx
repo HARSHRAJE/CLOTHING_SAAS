@@ -500,33 +500,80 @@ export default function LandingPage() {
             </div>
 
             {/* Header */}
-            <header className="absolute top-[40px] w-full z-50 bg-transparent py-6 px-8 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    {shopDetails.instagramUrl && (
-                        <a href={shopDetails.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-gray-600 transition-colors" title="Instagram">
-                            <Instagram className="w-5 h-5" />
-                        </a>
-                    )}
-                    {shopDetails.phone && (
-                        <a href={`tel:${shopDetails.phone}`} className="text-gray-900 hover:text-gray-600 transition-colors" title="Call Us">
-                            <Phone className="w-5 h-5" />
-                        </a>
-                    )}
-                    {shopDetails.whatsappNumber && (
-                        <a href={`https://wa.me/${shopDetails.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-[#25D366] transition-colors" title="WhatsApp">
-                            <MessageCircle className="w-5 h-5" />
-                        </a>
-                    )}
-                </div>
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center whitespace-nowrap">
-                    <h1 className="text-3xl font-serif text-black uppercase tracking-widest">{shopDetails.name || slug}</h1>
+            <header className="absolute top-[40px] w-full z-50 bg-transparent py-4 sm:py-6 px-4 sm:px-8">
+                {/* Desktop Layout (Hidden on Mobile) */}
+                <div className="hidden sm:grid grid-cols-[1fr_minmax(auto,2fr)_1fr] items-center gap-4">
+                    {/* Left: Social Icons */}
+                    <div className="flex items-center gap-4 justify-start">
+                        {shopDetails.instagramUrl && (
+                            <a href={shopDetails.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-gray-600 transition-colors" title="Instagram">
+                                <Instagram className="w-5 h-5" />
+                            </a>
+                        )}
+                        {shopDetails.phone && (
+                            <a href={`tel:${shopDetails.phone}`} className="text-gray-900 hover:text-gray-600 transition-colors" title="Call Us">
+                                <Phone className="w-5 h-5" />
+                            </a>
+                        )}
+                        {shopDetails.whatsappNumber && (
+                            <a href={`https://wa.me/${shopDetails.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-[#25D366] transition-colors" title="WhatsApp">
+                                <MessageCircle className="w-5 h-5" />
+                            </a>
+                        )}
+                    </div>
+
+                    {/* Center: Shop Name */}
+                    <div className="flex flex-col items-center justify-center text-center px-4">
+                        <h1 className="text-2xl lg:text-3xl font-serif text-black uppercase tracking-widest break-words whitespace-normal text-center leading-tight">
+                            {shopDetails.name || slug}
+                        </h1>
+                    </div>
+
+                    {/* Right: Cart Icon */}
+                    <div className="flex items-center gap-6 text-gray-900 justify-end">
+                        <button onClick={() => setShowCart(true)} className="relative hover:text-gray-600 transition-colors">
+                            <ShoppingBag className="w-5 h-5" />
+                            {cartCount > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-black text-white text-[10px] rounded-full flex items-center justify-center font-bold">{cartCount}</span>}
+                        </button>
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-6 text-gray-900">
-                    <button onClick={() => setShowCart(true)} className="relative hover:text-gray-600 transition-colors">
-                        <ShoppingBag className="w-5 h-5" />
-                        {cartCount > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-black text-white text-[10px] rounded-full flex items-center justify-center font-bold">{cartCount}</span>}
-                    </button>
+                {/* Mobile Layout (Hidden on Desktop) */}
+                <div className="flex sm:hidden flex-col gap-4">
+                    {/* Top Row: Socials & Cart */}
+                    <div className="flex items-center justify-between w-full">
+                        <div className="flex items-center gap-4">
+                            {shopDetails.instagramUrl && (
+                                <a href={shopDetails.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-gray-600 transition-colors" title="Instagram">
+                                    <Instagram className="w-5 h-5" />
+                                </a>
+                            )}
+                            {shopDetails.phone && (
+                                <a href={`tel:${shopDetails.phone}`} className="text-gray-900 hover:text-gray-600 transition-colors" title="Call Us">
+                                    <Phone className="w-5 h-5" />
+                                </a>
+                            )}
+                            {shopDetails.whatsappNumber && (
+                                <a href={`https://wa.me/${shopDetails.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-gray-900 hover:text-[#25D366] transition-colors" title="WhatsApp">
+                                    <MessageCircle className="w-5 h-5" />
+                                </a>
+                            )}
+                        </div>
+
+                        <div className="flex items-center text-gray-900">
+                            <button onClick={() => setShowCart(true)} className="relative hover:text-gray-600 transition-colors">
+                                <ShoppingBag className="w-5 h-5" />
+                                {cartCount > 0 && <span className="absolute -top-2 -right-2 w-4 h-4 bg-black text-white text-[10px] rounded-full flex items-center justify-center font-bold">{cartCount}</span>}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Bottom Row: Shop Name */}
+                    <div className="flex flex-col items-center justify-center text-center px-2 w-full">
+                        <h1 className="text-xl md:text-2xl font-serif text-black uppercase tracking-widest break-words whitespace-normal text-center leading-tight">
+                            {shopDetails.name || slug}
+                        </h1>
+                    </div>
                 </div>
             </header>
 
