@@ -456,7 +456,12 @@ export default function LandingPage() {
                                                         </div>
                                                     </div>
                                                     <div className="flex items-center gap-3">
-                                                        <span className="font-bold text-gray-900">₹{(v.price ?? selectedProduct.price).toLocaleString()}</span>
+                                                        <div className="flex flex-col items-end gap-0.5">
+                                                            {(v.price ?? selectedProduct.price) && (
+                                                                <span className="text-xs font-medium text-gray-400 line-through font-mono">₹{(v.price ?? selectedProduct.price).toLocaleString()}</span>
+                                                            )}
+                                                            <span className="font-bold text-gray-900 font-mono">₹{selectedProduct.costPrice ? selectedProduct.costPrice.toLocaleString() : (v.price ?? selectedProduct.price).toLocaleString()}</span>
+                                                        </div>
                                                         <span onClick={(e) => { e.stopPropagation(); addToCart(selectedProduct, v); }}
                                                             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${v.stock <= 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer'
                                                                 }`}>
