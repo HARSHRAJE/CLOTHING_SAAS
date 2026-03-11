@@ -38,10 +38,10 @@ public class CustomerService {
     @Transactional
     public CustomerDto.CustomerResponse createCustomer(CustomerDto.CreateCustomerRequest request) {
         // Check if exists
-        customerRepository.findByShopIdAndPhone(request.getShopId(), request.getPhone())
-                .ifPresent(c -> {
-                    throw new RuntimeException("Customer already exists");
-                });
+        var existing = customerRepository.findByShopIdAndPhone(request.getShopId(), request.getPhone());
+        if (existing.isPresent()) {
+            return mapToResponse(existing.get());
+        }
 
         Customer customer = Customer.builder()
                 .shopId(request.getShopId())
