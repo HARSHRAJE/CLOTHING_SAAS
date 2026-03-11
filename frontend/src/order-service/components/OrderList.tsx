@@ -61,18 +61,15 @@ const OrderList = () => {
 
         try {
             const response = await sendWhatsAppNotification(phone, message);
-            if (response && response.link) {
-                window.open(response.link, '_blank');
-            } else {
-                // Fallback
-                const encoded = encodeURIComponent(message);
-                window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
-            }
+            const linkUrl = (response && response.link) ? response.link : `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+            // iOS Safari is very strict about popups in async functions.
+            // Direct navigation is the most reliable way to trigger universal links/deep links.
+            window.location.href = linkUrl;
+
         } catch (error: any) {
             console.error("Failed to generate WhatsApp link", error);
-            // Fallback on error
-            const encoded = encodeURIComponent(message);
-            window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+            window.location.href = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
         }
     };
 
