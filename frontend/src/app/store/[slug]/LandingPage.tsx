@@ -426,9 +426,9 @@ export default function LandingPage() {
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{selectedProduct.name}</h1>
                                 <div className="flex items-center gap-3 mb-4">
                                     {selectedProduct.costPrice && selectedProduct.costPrice > selectedProduct.price && (
-                                        <p className="text-xl font-medium text-gray-400 line-through font-mono">₹{selectedProduct.costPrice.toLocaleString()}</p>
+                                        <p className="text-xl font-medium text-gray-400 line-through font-mono">₹{selectedProduct.price.toLocaleString()}</p>
                                     )}
-                                    <p className="text-3xl font-bold text-emerald-600">₹{selectedProduct.price.toLocaleString()}</p>
+                                    <p className="text-3xl font-bold text-emerald-600">₹{selectedProduct.costPrice ? selectedProduct.costPrice.toLocaleString() : selectedProduct.price.toLocaleString()}</p>
                                 </div>
                                 {selectedProduct.description && <p className="text-gray-600 mb-6 leading-relaxed">{selectedProduct.description}</p>}
 

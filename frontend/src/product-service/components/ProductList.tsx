@@ -101,10 +101,10 @@ export default function ProductList({ onEdit }: ProductListProps) {
                                 </td>
 
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center gap-2">
-                                    {product.costPrice && product.costPrice > product.price && (
-                                        <span className="text-gray-400 line-through">₹{product.costPrice}</span>
+                                    {product.price && (
+                                        <span className="text-gray-400 line-through">₹{product.price}</span>
                                     )}
-                                    <span className="font-semibold text-gray-900">₹{product.price}</span>
+                                    <span className="font-semibold text-gray-900">₹{product.costPrice}</span>
                                 </td>
 
                                 <td className="px-6 py-4 whitespace-nowrap">

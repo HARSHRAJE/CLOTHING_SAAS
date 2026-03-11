@@ -287,28 +287,17 @@ export default function CollectionsPage() {
                                                     </div>
                                                 )}
 
-                                                {/* Top Right Action Icons */}
-                                                <div className="absolute top-3 right-3 flex flex-col gap-2 z-10 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                                                    <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow hover:bg-black hover:text-white transition-colors text-gray-600">
-                                                        <Heart className="w-4 h-4" />
-                                                    </button>
-                                                    <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow hover:bg-black hover:text-white transition-colors text-gray-600">
-                                                        <Repeat className="w-4 h-4" />
-                                                    </button>
-                                                    <button className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow hover:bg-black hover:text-white transition-colors text-gray-600">
-                                                        <Eye className="w-4 h-4" />
-                                                    </button>
-                                                </div>
+                                                {/* Action Icons removed by request */}
                                             </div>
 
                                             {/* Product Info */}
                                             <div className="flex flex-col gap-1.5 px-1">
                                                 <h3 className="text-[14px] font-medium text-gray-800 tracking-wide">{product.name}</h3>
                                                 <div className="flex items-center gap-2">
-                                                    {product.costPrice && product.costPrice > product.price && (
-                                                        <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {product.costPrice.toLocaleString()}</span>
+                                                    {product.price && (
+                                                        <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {product.price.toLocaleString()}</span>
                                                     )}
-                                                    <span className="text-[14px] font-bold text-[#dc2626] font-mono">Rs. {product.price.toLocaleString()}</span>
+                                                    <span className="text-sm font-semibold text-gray-900 font-mono">Rs. {product.costPrice ? product.costPrice.toLocaleString() : 'N/A'}</span>
                                                 </div>
                                             </div>
                                         </Link>
