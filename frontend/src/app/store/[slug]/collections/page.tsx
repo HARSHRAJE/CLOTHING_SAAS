@@ -23,6 +23,7 @@ interface Product {
     name: string;
     description?: string;
     price: number;
+    costPrice?: number;
     status: string;
     variants?: Variant[];
 }
@@ -304,7 +305,9 @@ export default function CollectionsPage() {
                                             <div className="flex flex-col gap-1.5 px-1">
                                                 <h3 className="text-[14px] font-medium text-gray-800 tracking-wide">{product.name}</h3>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {((product.price * 1.18).toFixed(2))}</span>
+                                                    {product.costPrice && product.costPrice > product.price && (
+                                                        <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {product.costPrice.toLocaleString()}</span>
+                                                    )}
                                                     <span className="text-[14px] font-bold text-[#dc2626] font-mono">Rs. {product.price.toLocaleString()}</span>
                                                 </div>
                                             </div>

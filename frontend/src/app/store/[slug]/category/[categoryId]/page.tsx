@@ -23,6 +23,7 @@ interface Product {
     name: string;
     description?: string;
     price: number;
+    costPrice?: number;
     status: string;
     category?: { id: string; name: string };
     variants?: Variant[];
@@ -229,16 +230,10 @@ export default function CategoryPage() {
                                         <div className="flex flex-col gap-1.5 px-1">
                                             <h3 className="text-[14px] font-medium text-gray-800 tracking-wide group-hover:text-[#cba258] transition-colors">{product.name}</h3>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {(product.price * 1.5).toLocaleString()}</span>
+                                                {product.costPrice && product.costPrice > product.price && (
+                                                    <span className="text-[13px] text-gray-400 line-through font-mono">Rs. {product.costPrice.toLocaleString()}</span>
+                                                )}
                                                 <span className="text-[14px] font-bold text-[#dc2626] font-mono">Rs. {product.price.toLocaleString()}</span>
-                                            </div>
-
-                                            {/* Color Swatches (Mock) */}
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <div className="w-3.5 h-3.5 rounded-full bg-black border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
-                                                <div className="w-3.5 h-3.5 rounded-full bg-white border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
-                                                <div className="w-3.5 h-3.5 rounded-full bg-red-800 border border-gray-200 cursor-pointer ring-1 ring-offset-1 ring-transparent hover:ring-black"></div>
-                                                <span className="text-[10px] font-bold text-gray-500 ml-1">+ 2</span>
                                             </div>
                                         </div>
                                     </Link>

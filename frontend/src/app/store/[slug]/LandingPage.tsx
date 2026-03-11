@@ -30,6 +30,7 @@ interface Product {
     name: string;
     description?: string;
     price: number;
+    costPrice?: number;
     status: string;
     variants?: Variant[];
     category?: { id: string; name: string };
@@ -423,7 +424,12 @@ export default function LandingPage() {
                                     <span className="inline-block px-3 py-1 bg-emerald-50 text-emerald-700 text-sm font-medium rounded-full mb-3">{selectedProduct.category.name}</span>
                                 )}
                                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{selectedProduct.name}</h1>
-                                <p className="text-3xl font-bold text-emerald-600 mb-4">₹{selectedProduct.price.toLocaleString()}</p>
+                                <div className="flex items-center gap-3 mb-4">
+                                    {selectedProduct.costPrice && selectedProduct.costPrice > selectedProduct.price && (
+                                        <p className="text-xl font-medium text-gray-400 line-through font-mono">₹{selectedProduct.costPrice.toLocaleString()}</p>
+                                    )}
+                                    <p className="text-3xl font-bold text-emerald-600">₹{selectedProduct.price.toLocaleString()}</p>
+                                </div>
                                 {selectedProduct.description && <p className="text-gray-600 mb-6 leading-relaxed">{selectedProduct.description}</p>}
 
                                 {/* Variants */}
@@ -784,7 +790,7 @@ export default function LandingPage() {
                                 </div>
                                 <div>
                                     <span className="text-white font-semibold tracking-wider mb-2 block">Timing :</span>
-                                    <p>Mon-Sun: 12:00 pm - 8:00 pm</p>
+                                    <p>Mon-Sun: 11:00 am - 9:00 pm</p>
                                 </div>
                                 <div>
                                     <span className="text-white font-semibold tracking-wider mb-2 block">Customer Care:</span>
