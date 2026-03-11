@@ -100,7 +100,12 @@ export default function ProductList({ onEdit }: ProductListProps) {
                                     </div>
                                 </td>
 
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹{product.price}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex items-center gap-2">
+                                    {product.costPrice && product.costPrice > product.price && (
+                                        <span className="text-gray-400 line-through">₹{product.costPrice}</span>
+                                    )}
+                                    <span className="font-semibold text-gray-900">₹{product.price}</span>
+                                </td>
 
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${product.status === 'ACTIVE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
