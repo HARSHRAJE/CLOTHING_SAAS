@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import axios from 'axios';
@@ -48,13 +47,26 @@ interface CartItem {
     imageUrl?: string;
 }
 
-export default function LandingPage() {
-    const params = useParams();
-    const slug = params.slug as string;
+interface ShopDetails {
+    name: string;
+    address: string;
+    phone: string;
+    whatsappNumber: string;
+    email: string;
+    instagramUrl: string;
+}
 
-    const [products, setProducts] = useState<Product[]>([]);
-    const [categories, setCategories] = useState<Category[]>([]);
-    const [loading, setLoading] = useState(true);
+interface LandingPageProps {
+    initialShopDetails: ShopDetails;
+    initialCategories: Category[];
+    initialProducts: Product[];
+    slug: string;
+}
+
+export default function LandingPage({ initialShopDetails, initialCategories, initialProducts, slug }: LandingPageProps) {
+    const [products, setProducts] = useState<Product[]>(initialProducts);
+    const [categories, setCategories] = useState<Category[]>(initialCategories);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -68,46 +80,7 @@ export default function LandingPage() {
     const [selectedImageIdx, setSelectedImageIdx] = useState(0);
     const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
 
-    const [shopDetails, setShopDetails] = useState({
-        name: '',
-        address: '',
-        phone: '',
-        whatsappNumber: '',
-        email: '',
-        instagramUrl: ''
-    });
-
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const [shopRes, catsRes, prodRes] = await Promise.all([
-                axios.get(`${API}/store/${slug}`),
-                axios.get(`${API}/store/products/${slug}/categories`),
-                axios.get(`${API}/store/products/${slug}`)
-            ]);
-
-            const shopId = shopRes.data.shopId;
-            setShopDetails({
-                name: shopRes.data.name || slug,
-                address: shopRes.data.address || '',
-                phone: shopRes.data.phone || '',
-                whatsappNumber: shopRes.data.whatsappNumber || '',
-                email: shopRes.data.email || '',
-                instagramUrl: shopRes.data.instagramUrl || ''
-            });
-
-            setCategories(catsRes.data);
-            setProducts(prodRes.data);
-        } catch {
-            setError('Shop not found or no products available.');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchData();
-    }, [slug]);
+    const [shopDetails, setShopDetails] = useState<ShopDetails>(initialShopDetails);
 
     useEffect(() => {
         if (orderSuccess || showOrder || showCart) {
