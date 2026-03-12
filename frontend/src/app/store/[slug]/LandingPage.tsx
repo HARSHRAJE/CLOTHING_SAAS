@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import axios from 'axios';
 import { ShoppingBag, ArrowLeft, Plus, Minus, Trash2, Send, Store, Package, X, ChevronLeft, ChevronRight, Instagram, Phone, MessageCircle } from 'lucide-react';
 
@@ -79,9 +80,13 @@ export default function LandingPage() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            // 1. Fetch shop details to get the UUID
-            const shopRes = await axios.get(`${API}/store/${slug}`);
-            const shopId = shopRes.data.shopId; // Fix: the DTO is shopId, not id! Wait, PublicShopResponse has shopId.
+            const [shopRes, catsRes, prodRes] = await Promise.all([
+                axios.get(`${API}/store/${slug}`),
+                axios.get(`${API}/store/products/${slug}/categories`),
+                axios.get(`${API}/store/products/${slug}`)
+            ]);
+
+            const shopId = shopRes.data.shopId;
             setShopDetails({
                 name: shopRes.data.name || slug,
                 address: shopRes.data.address || '',
@@ -91,12 +96,7 @@ export default function LandingPage() {
                 instagramUrl: shopRes.data.instagramUrl || ''
             });
 
-            // 2. Fetch categories for this shop
-            const catsRes = await axios.get(`${API}/store/products/${slug}/categories`);
             setCategories(catsRes.data);
-
-            // 3. Keep products for now for cart/checkout purposes
-            const prodRes = await axios.get(`${API}/store/products/${slug}`);
             setProducts(prodRes.data);
         } catch {
             setError('Shop not found or no products available.');
@@ -296,7 +296,7 @@ export default function LandingPage() {
                                 {cart.map(item => (
                                     <div key={item.variantId} className="bg-white rounded-xl border border-gray-200 p-4 flex items-center gap-4">
                                         {item.imageUrl ? (
-                                            <img src={getImageUrl(item.imageUrl)!} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                                            <Image src={getImageUrl(item.imageUrl)!} alt="" width={80} height={80} className="object-cover rounded-lg" />
                                         ) : (
                                             <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
                                                 <Package className="w-8 h-8 text-gray-400" />
@@ -377,7 +377,7 @@ export default function LandingPage() {
                                 <div className="aspect-square bg-gray-50 relative overflow-hidden">
                                     {displayImages.length > 0 ? (
                                         <>
-                                            <img src={getImageUrl(displayImages[safeIdx].url)!} alt={selectedProduct.name} className="w-full h-full object-cover transition-opacity duration-300" />
+                                            <Image src={getImageUrl(displayImages[safeIdx].url)!} alt={selectedProduct.name} fill className="object-cover transition-opacity duration-300" />
                                             {/* Variant label */}
                                             <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 px-3 py-1 rounded-full">
                                                 {displayImages[safeIdx].variantLabel}
@@ -412,7 +412,7 @@ export default function LandingPage() {
                                         {displayImages.map((img, idx) => (
                                             <button key={idx} onClick={() => setSelectedImageIdx(idx)}
                                                 className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${idx === safeIdx ? 'border-emerald-500 shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                                                <img src={getImageUrl(img.url)!} alt="" className="w-full h-full object-cover" />
+                                                <Image src={getImageUrl(img.url)!} alt="" width={64} height={64} className="object-cover" />
                                             </button>
                                         ))}
                                     </div>
@@ -445,7 +445,7 @@ export default function LandingPage() {
                                                         }`}>
                                                     <div className="flex items-center gap-3">
                                                         {v.imageUrls?.[0] ? (
-                                                            <img src={getImageUrl(v.imageUrls[0])!} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                                                            <Image src={getImageUrl(v.imageUrls[0])!} alt="" width={48} height={48} className="object-cover rounded-lg" />
                                                         ) : (
                                                             <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                                                                 <Package className="w-5 h-5 text-gray-400" />
@@ -591,10 +591,12 @@ export default function LandingPage() {
 
             {/* Hero */}
             <div className="relative w-full h-[85vh] flex items-center overflow-hidden">
-                <img
+                <Image
                     src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop"
                     alt="Latest Collection"
-                    className="absolute inset-0 w-full h-full object-cover object-center scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
+                    fill
+                    priority
+                    className="object-cover object-center scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
 
@@ -710,10 +712,11 @@ export default function LandingPage() {
                                     {/* Category Image or Abstract placeholder */}
                                     <div className="aspect-[4/5] bg-gray-100 overflow-hidden relative mb-6">
                                         {categoryImage ? (
-                                            <img
+                                            <Image
                                                 src={categoryImage}
                                                 alt={category.name}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                                fill
+                                                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-gradient-to-br from-gray-50 to-gray-200 flex items-center justify-center group-hover:scale-105 transition-transform duration-700 ease-in-out">

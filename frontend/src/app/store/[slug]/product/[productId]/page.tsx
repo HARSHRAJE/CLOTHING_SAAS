@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import axios from 'axios';
 import { ArrowLeft, ShoppingBag, ChevronLeft, ChevronRight, Package, Send, Trash2, Plus, Minus } from 'lucide-react';
 
@@ -190,7 +191,7 @@ export default function ProductPage() {
                                     <div key={item.variantId} className="flex gap-4 bg-white border border-gray-100 p-4 rounded-xl shadow-sm">
                                         <div className="w-20 h-20 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0">
                                             {item.imageUrl ? (
-                                                <img src={getImageUrl(item.imageUrl)!} alt="" className="w-full h-full object-cover" />
+                                                <Image src={getImageUrl(item.imageUrl)!} alt="" width={80} height={80} className="object-cover" />
                                             ) : (
                                                 <Package className="w-full h-full p-4 text-gray-300" />
                                             )}
@@ -356,7 +357,7 @@ export default function ProductPage() {
                             <div className="aspect-square bg-gray-50 relative overflow-hidden">
                                 {displayImages.length > 0 ? (
                                     <>
-                                        <img src={getImageUrl(displayImages[safeIdx].url)!} alt={product.name} className="w-full h-full object-cover transition-opacity duration-300" />
+                                        <Image src={getImageUrl(displayImages[safeIdx].url)!} alt={product.name} fill className="object-cover transition-opacity duration-300" />
                                         {/* Variant label */}
                                         <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-xs font-medium text-gray-700 px-3 py-1 rounded-full">
                                             {displayImages[safeIdx].variantLabel}
@@ -391,7 +392,7 @@ export default function ProductPage() {
                                     {displayImages.map((img, idx) => (
                                         <button key={idx} onClick={() => setSelectedImageIdx(idx)}
                                             className={`w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${idx === safeIdx ? 'border-[#1a1a1a] shadow-md' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                                            <img src={getImageUrl(img.url)!} alt="" className="w-full h-full object-cover" />
+                                            <Image src={getImageUrl(img.url)!} alt="" width={64} height={64} className="object-cover" />
                                         </button>
                                     ))}
                                 </div>
@@ -419,7 +420,7 @@ export default function ProductPage() {
                                                     }`}>
                                                 <div className="flex items-center gap-3">
                                                     {v.imageUrls?.[0] ? (
-                                                        <img src={getImageUrl(v.imageUrls[0])!} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                                                        <Image src={getImageUrl(v.imageUrls[0])!} alt="" width={48} height={48} className="object-cover rounded-lg" />
                                                     ) : (
                                                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                                                             <Package className="w-5 h-5 text-gray-400" />

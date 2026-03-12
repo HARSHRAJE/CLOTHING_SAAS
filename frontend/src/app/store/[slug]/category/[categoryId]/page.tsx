@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import axios from 'axios';
 import { ChevronDown, ChevronUp, ShoppingBag, Eye, ArrowLeft, Heart, Repeat } from 'lucide-react';
 
@@ -57,18 +58,17 @@ export default function CategoryPage() {
         try {
             setLoading(true);
 
-            // 1. Get Shop ID
-            const shopRes = await axios.get(`${API}/store/${slug}`);
+            const [shopRes, catsRes, prodRes] = await Promise.all([
+                axios.get(`${API}/store/${slug}`),
+                axios.get(`${API}/store/products/${slug}/categories`),
+                axios.get(`${API}/store/products/${slug}`)
+            ]);
+
             const shopId = shopRes.data.shopId;
 
-            // 2. Get Categories to find the current one's name
-            const catsRes = await axios.get(`${API}/store/products/${slug}/categories`);
             const currentCat = catsRes.data.find((c: Category) => c.id === categoryId);
             if (currentCat) setCategory(currentCat);
 
-            // 3. Get all products and filter by categoryId
-            const prodRes = await axios.get(`${API}/store/products/${slug}`);
-            // Ensure comparison works with UUID strings
             const categoryProducts = prodRes.data.filter((p: any) =>
                 p.category?.id === categoryId || p.category?.id?.toString() === categoryId
             );
@@ -201,10 +201,11 @@ export default function CategoryPage() {
                                         {/* Image Container */}
                                         <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden w-full">
                                             {heroImg ? (
-                                                <img
+                                                <Image
                                                     src={getImageUrl(heroImg)!}
                                                     alt={product.name}
-                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                                    fill
+                                                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">

@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import axios from 'axios';
 import { ChevronDown, ChevronUp, ShoppingBag, Eye, ArrowLeft, Heart, Repeat } from 'lucide-react';
 
@@ -276,10 +277,11 @@ export default function CollectionsPage() {
                                             {/* Image Container */}
                                             <div className="relative aspect-[4/5] bg-gray-100 overflow-hidden w-full">
                                                 {heroImg ? (
-                                                    <img
+                                                    <Image
                                                         src={getImageUrl(heroImg)!}
                                                         alt={product.name}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+                                                        fill
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-50">
