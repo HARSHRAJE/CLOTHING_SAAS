@@ -14,6 +14,7 @@ interface Variant {
     size: string;
     color: string;
     price?: number;
+    costPrice?: number;
     stock: number;
     imageUrls?: string[];
 }
@@ -124,7 +125,7 @@ export default function LandingPage() {
                 productName: product.name,
                 size: variant.size,
                 color: variant.color,
-                price: variant.price ?? product.price,
+                price: product.costPrice ? product.costPrice : (variant.price ?? product.price),
                 quantity: 1,
                 imageUrl: variant.imageUrls?.[0],
             }]);

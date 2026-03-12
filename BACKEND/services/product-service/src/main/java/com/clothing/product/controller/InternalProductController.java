@@ -38,7 +38,7 @@ public class InternalProductController {
                 .category(product.getCategory() != null ? product.getCategory().getName() : "Uncategorized")
                 .size(variant.getSize())
                 .color(variant.getColor())
-                .price(variant.getPrice() != null ? variant.getPrice() : product.getPrice())
+                .price(product.getCostPrice() != null ? product.getCostPrice() : (variant.getPrice() != null ? variant.getPrice() : product.getPrice()))
                 .availableStock(variant.getStock())
                 .status(product.getStatus().name())
                 .build());
