@@ -1,6 +1,6 @@
 import LandingPage from './LandingPage';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
+const API = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
 
 interface PageProps {
     params: Promise<{ slug: string }>;
