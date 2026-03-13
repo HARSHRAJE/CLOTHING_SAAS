@@ -565,12 +565,14 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
             {/* Hero */}
             <div className="relative w-full h-[85vh] flex items-center overflow-hidden">
                 <Image
-                    src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=2000&auto=format&fit=crop"
+                    src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop"
                     alt="Latest Collection"
                     fill
                     priority
                     sizes="100vw"
-                    quality={75}
+                    quality={70}
+                    placeholder="blur"
+                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMCwsKCwsM"
                     className="object-cover object-center scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
@@ -693,7 +695,9 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                                                 fill
                                                 priority
                                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                                quality={75}
+                                                quality={70}
+                                                placeholder="blur"
+                                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMCwsKCwsM"
                                                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                             />
                                         ) : (
