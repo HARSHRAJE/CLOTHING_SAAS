@@ -569,6 +569,8 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                     alt="Latest Collection"
                     fill
                     priority
+                    sizes="100vw"
+                    quality={75}
                     className="object-cover object-center scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
@@ -689,6 +691,9 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                                                 src={categoryImage}
                                                 alt={category.name}
                                                 fill
+                                                priority
+                                                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                                quality={75}
                                                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                             />
                                         ) : (
