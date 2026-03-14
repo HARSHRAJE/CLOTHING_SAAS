@@ -61,9 +61,10 @@ interface LandingPageProps {
     initialCategories: Category[];
     initialProducts: Product[];
     slug: string;
+    mediaBaseUrl: string;
 }
 
-export default function LandingPage({ initialShopDetails, initialCategories, initialProducts, slug }: LandingPageProps) {
+export default function LandingPage({ initialShopDetails, initialCategories, initialProducts, slug, mediaBaseUrl }: LandingPageProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [loading, setLoading] = useState(false);
@@ -154,9 +155,10 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
     const getImageUrl = (url?: string) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        // URLs are stored as "/media/UUID/view" or just "UUID"
-        if (url.startsWith('/media/')) return `${API}${url}`;
-        return `${API}/media/${url}/view`;
+        // Use direct backend URL for images - bypasses proxy for faster loading
+        const base = mediaBaseUrl || API;
+        if (url.startsWith('/media/')) return `${base}${url}`;
+        return `${base}/media/${url}/view`;
     };
 
     // --- ORDER SUCCESS ---
