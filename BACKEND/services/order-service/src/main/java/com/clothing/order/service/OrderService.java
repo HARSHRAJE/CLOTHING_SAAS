@@ -128,7 +128,9 @@ public class OrderService {
         order.setDiscountAmount(BigDecimal.ZERO);
         order.setItems(orderItems);
 
-        if (customer.getRemoteCustomerId() != null) {
+        if (request.getAddress() != null && !request.getAddress().isBlank()) {
+            order.setAddress(request.getAddress());
+        } else if (customer.getRemoteCustomerId() != null) {
             String address = customerService.getDefaultAddress(customer.getRemoteCustomerId());
             if (address != null) {
                 order.setAddress(address);

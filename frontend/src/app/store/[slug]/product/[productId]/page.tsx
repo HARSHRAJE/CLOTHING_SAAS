@@ -57,7 +57,7 @@ export default function ProductPage() {
     const [cart, setCart] = useState<CartItem[]>([]);
     const [showCart, setShowCart] = useState(false);
     const [showOrder, setShowOrder] = useState(false);
-    const [orderForm, setOrderForm] = useState({ customerName: '', phone: '', email: '' });
+    const [orderForm, setOrderForm] = useState({ customerName: '', phone: '', address: '' });
     const [orderSuccess, setOrderSuccess] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
@@ -127,13 +127,13 @@ export default function ProductPage() {
             await axios.post(`${API}/store/${slug}/orders`, {
                 customerName: orderForm.customerName,
                 phone: orderForm.phone,
-                email: orderForm.email || undefined,
+                address: orderForm.address,
                 orderSource: 'WEBSITE',
                 items: cart.map(c => ({ variantId: c.variantId, quantity: c.quantity })),
             });
             setOrderSuccess(true);
             setCart([]);
-            setOrderForm({ customerName: '', phone: '', email: '' });
+            setOrderForm({ customerName: '', phone: '', address: '' });
             setShowOrder(false);
             setShowCart(false);
         } catch {
@@ -287,9 +287,13 @@ export default function ProductPage() {
                                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow" placeholder="+91 98765 43210" />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email (optional)</label>
-                                <input type="email" value={orderForm.email} onChange={e => setOrderForm({ ...orderForm, email: e.target.value })}
-                                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow" placeholder="john@example.com" />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Address *</label>
+                                <textarea
+                                    value={orderForm.address}
+                                    onChange={e => setOrderForm({ ...orderForm, address: e.target.value })}
+                                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow min-h-[100px] resize-none"
+                                    placeholder="Enter your full delivery address..."
+                                />
                             </div>
                         </div>
                     </div>
@@ -312,7 +316,7 @@ export default function ProductPage() {
                         </div>
                     </div>
 
-                    <button onClick={placeOrder} disabled={submitting || !orderForm.customerName || !orderForm.phone}
+                    <button onClick={placeOrder} disabled={submitting || !orderForm.customerName || !orderForm.phone || !orderForm.address}
                         className="w-full bg-[#1a1a1a] text-white py-4 rounded-xl font-semibold text-lg hover:bg-black transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                         <Send className="w-5 h-5" />
                         {submitting ? 'Placing Order...' : 'Place Order'}

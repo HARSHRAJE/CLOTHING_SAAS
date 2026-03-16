@@ -18,6 +18,7 @@ public class OrderDto {
         private String customerName;
         private String phone;
         private String email;
+        private String address;
         private List<OrderItemRequest> items;
         private OrderSource orderSource;
     }
