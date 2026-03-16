@@ -61,10 +61,9 @@ interface LandingPageProps {
     initialCategories: Category[];
     initialProducts: Product[];
     slug: string;
-    mediaBaseUrl: string;
 }
 
-export default function LandingPage({ initialShopDetails, initialCategories, initialProducts, slug, mediaBaseUrl }: LandingPageProps) {
+export default function LandingPage({ initialShopDetails, initialCategories, initialProducts, slug }: LandingPageProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [loading, setLoading] = useState(false);
@@ -155,10 +154,8 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
     const getImageUrl = (url?: string) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        // Use direct backend URL for images - bypasses proxy for faster loading
-        const base = mediaBaseUrl || API;
-        if (url.startsWith('/media/')) return `${base}${url}`;
-        return `${base}/media/${url}/view`;
+        if (url.startsWith('/media/')) return `${API}${url}`;
+        return `${API}/media/${url}/view`;
     };
 
     // --- ORDER SUCCESS ---
@@ -349,7 +346,7 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                             {/* Image Gallery */}
                             <div className="flex flex-col">
                                 {/* Main Image */}
-                                <div className="aspect-square bg-gray-50 relative overflow-hidden">
+                                <div className="aspect-square img-shimmer relative overflow-hidden">
                                     {displayImages.length > 0 ? (
                                         <>
                                             <Image src={getImageUrl(displayImages[safeIdx].url)!} alt={selectedProduct.name} fill className="object-cover transition-opacity duration-300" />
@@ -565,7 +562,7 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
             </header>
 
             {/* Hero */}
-            <div className="relative w-full h-[85vh] flex items-center overflow-hidden">
+            <div className="relative w-full h-[85vh] flex items-center overflow-hidden img-shimmer">
                 <Image
                     src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1200&auto=format&fit=crop"
                     alt="Latest Collection"
@@ -573,8 +570,6 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                     priority
                     sizes="100vw"
                     quality={70}
-                    placeholder="blur"
-                    blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMCwsKCwsM"
                     className="object-cover object-center scale-105 animate-[pulse_20s_ease-in-out_infinite_alternate]"
                 />
                 <div className="absolute inset-0 bg-black/30"></div>
@@ -689,7 +684,7 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                                 <Link key={category.id} href={`/store/${slug}/category/${category.id}`}
                                     className="group text-left focus:outline-none w-full block">
                                     {/* Category Image or Abstract placeholder */}
-                                    <div className="aspect-[4/5] bg-gray-100 overflow-hidden relative mb-6">
+                                    <div className="aspect-[4/5] img-shimmer overflow-hidden relative mb-6">
                                         {categoryImage ? (
                                             <Image
                                                 src={categoryImage}
@@ -698,8 +693,6 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                                                 priority
                                                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                                                 quality={70}
-                                                placeholder="blur"
-                                                blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMCwsKCwsM"
                                                 className="object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
                                             />
                                         ) : (

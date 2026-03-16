@@ -44,7 +44,6 @@ export default async function Page({ params }: PageProps) {
             initialCategories={categories}
             initialProducts={products}
             slug={slug}
-            mediaBaseUrl={API}
         />
     );
 }
