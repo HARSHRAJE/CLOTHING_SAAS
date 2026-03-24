@@ -83,8 +83,11 @@ export default function ProductPage() {
     const getImageUrl = (url?: string) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        if (url.startsWith('/media/')) return `${API}${url}`;
-        return `${API}/media/${url}/view`;
+        
+        // Use direct backend URL for images to bypass Next.js API proxy buffering latency (5s delay)
+        const base = 'https://api-gateway-507952736973.asia-south1.run.app';
+        if (url.startsWith('/media/')) return `${base}${url}`;
+        return `${base}/media/${url}/view`;
     };
 
     const addToCart = (product: Product, variant: Variant) => {

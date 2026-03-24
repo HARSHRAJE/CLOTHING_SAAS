@@ -68,8 +68,9 @@ export default function CollectionsPage() {
     const getImageUrl = (url?: string) => {
         if (!url) return null;
         if (url.startsWith('http')) return url;
-        if (url.startsWith('/media/')) return `${API}${url}`;
-        return `${API}/media/${url}/view`;
+        const base = 'https://api-gateway-507952736973.asia-south1.run.app';
+        if (url.startsWith('/media/')) return `${base}${url}`;
+        return `${base}/media/${url}/view`;
     };
 
     // Calculate derived data based on filters and sorting
