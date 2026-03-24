@@ -99,4 +99,17 @@ public class MediaService {
 
         return gcsService.downloadFile(path);
     }
+
+    @Transactional(readOnly = true)
+    public String getMediaSignedUrl(UUID id) {
+        Media media = mediaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Media not found"));
+
+        String path = "shop-" + media.getShopId() + "/"
+                + media.getEntityType().name().toLowerCase() + "/"
+                + media.getEntityId() + "/"
+                + media.getFileName();
+
+        return gcsService.getSignedUrl(path);
+    }
 }

@@ -39,4 +39,10 @@ public class GcsService {
         BlobId blobId = BlobId.of(bucketName, path);
         return storage.readAllBytes(blobId);
     }
+
+    public String getSignedUrl(String path) {
+        BlobInfo blobInfo = BlobInfo.newBuilder(BlobId.of(bucketName, path)).build();
+        return storage.signUrl(blobInfo, 1, java.util.concurrent.TimeUnit.HOURS,
+                Storage.SignUrlOption.httpMethod(com.google.cloud.storage.HttpMethod.GET)).toString();
+    }
 }

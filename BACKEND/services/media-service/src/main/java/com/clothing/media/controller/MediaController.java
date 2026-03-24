@@ -102,13 +102,11 @@ public class MediaController {
 
     @Operation(summary = "View media content")
     @GetMapping("/{id}/view")
-    public ResponseEntity<byte[]> viewMedia(@PathVariable UUID id) {
-        Media media = mediaService.getMediaById(id);
-        byte[] content = mediaService.getMediaContent(id);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(media.getFileType()))
-                .body(content);
+    public ResponseEntity<Void> viewMedia(@PathVariable UUID id) {
+        String signedUrl = mediaService.getMediaSignedUrl(id);
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(java.net.URI.create(signedUrl))
+                .build();
     }
 
     @Operation(summary = "List all media for shop")
