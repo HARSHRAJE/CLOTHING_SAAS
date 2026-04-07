@@ -769,6 +769,8 @@ export default function LandingPage({ initialShopDetails, initialCategories, ini
                             </h4>
                             <ul className="space-y-4 text-[13px] font-mono text-gray-400">
                                 <li><Link href={`/store/${slug}/contact`} className="hover:text-white transition-colors">Contact Us</Link></li>
+                                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                                <li><Link href="/terms-and-conditions" className="hover:text-white transition-colors">Terms and Conditions</Link></li>
                             </ul>
                         </div>
 
